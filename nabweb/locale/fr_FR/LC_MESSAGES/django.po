@@ -473,16 +473,16 @@ msgid "Shutdown"
 msgstr "Arrêter"
 
 #: templates/nabweb/system-info/index.html:31
-msgid "Reboot has been initiated !"
-msgstr "Le redémarrage est en cours !"
+msgid "<b>Reboot is in progress!</b>"
+msgstr "<b>Le redémarrage est en cours!</b>"
 
 #: templates/nabweb/system-info/index.html:37
-msgid "Shutdown has been initiated !"
-msgstr "L'arrêt est en cours !"
+msgid "<b>Shutdown is in progress!</b>"
+msgstr "<b>L'arrêt est en cours!</b>"
 
 #: templates/nabweb/system-info/index.html:37
-msgid "Please wait at least 10 seconds before unplugging the power cable"
-msgstr "Veuillez attendre au moins 10 secondes avant de débrancher le cable d'alimentation"
+msgid "Please wait at least 10 seconds before unplugging the power cable."
+msgstr "Veuillez attendre au moins 10 secondes avant de débrancher le cable d'alimentation."
 
 #: templates/nabweb/system-info/index.html:48
 msgid "Nabd daemon"
@@ -533,16 +533,16 @@ msgid "Ears"
 msgstr "Oreilles"
 
 #: templates/nabweb/system-info/index.html:133
-msgid "You are about to REBOOT the Raspberry Pi Linux system"
-msgstr "Vous êtes sur le point de REDEMARRER le système Linux du Raspberry Pi"
+msgid "You are about to <b>reboot</b> the Raspberry Pi Linux system."
+msgstr "Vous êtes sur le point de <b>redémarrer</b> le système Linux du Raspberry Pi."
 
 #: templates/nabweb/system-info/index.html:135
-msgid "You are about to SHUTDOWN the Raspberry Pi Linux system"
-msgstr "Vous êtes sur le point d'ETEINDRE le système Linux du Raspberry Pi"
+msgid "You are about to <b>shutdown</b> the Raspberry Pi Linux system."
+msgstr "Vous êtes sur le point d'<b>éteindre</b> le système Linux du Raspberry Pi."
 
 #: templates/nabweb/system-info/index.html:137
-msgid "Are you sure ?"
-msgstr "Etes-vous sûr(e) ?"
+msgid "Do you want to proceed?"
+msgstr "Voulez-vous continuer?"
 
 #: templates/nabweb/upgrade/_repository.html:9
 msgid "Up to date"
@@ -583,7 +583,7 @@ msgid ""
 msgstr ""
 "Des modifications locales ont été détectées dans au moins un repository. La "
 "mise à jour automatique risque d'échouer. Souhaitez-vous néanmoins "
-"continuer ?"
+"continuer?"
 
 #: templates/nabweb/upgrade/index.html:43
 msgid ""
