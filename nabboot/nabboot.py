@@ -32,7 +32,8 @@ def set_leds(shutdown):
     if shutdown:
         color = Color(0, 0, 0)
     else:
-        color = Color(255, 0, 255)
+        # color = Color(255, 0, 255) # magenta
+        color = Color(255, 69, 0) # orange
 
     for led in range(6):
         strip.setPixelColor(led, color)

@@ -116,7 +116,7 @@ class Nabd:
         """
         left, right = self.ears["left"], self.ears["right"]
         await self.nabio.move_ears_with_leds((255, 0, 255), left, right)
-        self.nabio.pulse(Led.BOTTOM, (255, 0, 255))
+        self.nabio.pulse(Led.BOTTOM, (255, 69, 0))
 
     async def sleep_setup(self):
         self.nabio.set_leds(None, None, None, None, None)
