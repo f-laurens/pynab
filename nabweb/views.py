@@ -348,8 +348,11 @@ class NabWebSytemInfoView(BaseView):
         }
 
     def get_pi_info(self):
-        with open("/proc/device-tree/model") as model_f:
-            model = model_f.readline()
+        try:
+            with open("/proc/device-tree/model") as model_f:
+                model = model_f.readline()
+        except (FileNotFoundError):
+            model = "unknown"
         return {"model": model}
 
     def get_context(self):
@@ -504,8 +507,7 @@ class GitInfo:
         )
         info["tag"] = (
             os.popen(
-                f"cd {repo_dir} && "
-                "sudo -u pi git describe --exact-match --tags"
+                f"cd {repo_dir} && " "sudo -u pi git describe --long --tags"
             )
             .read()
             .strip()
