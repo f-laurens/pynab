@@ -73,10 +73,11 @@ urlpatterns = [
     ),
 ]
 
-if os.getenv('PYNAB_DEVELOPMENT') is not None:
+if os.getenv("PYNAB_DEVELOPMENT") is not None:
     # Development environment does not use nginx, serve
     # static files directly
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
     urlpatterns += staticfiles_urlpatterns()
 
 # Service URLs added automatically
