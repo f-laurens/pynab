@@ -29,7 +29,8 @@ Les releases actuelles (>0.7.x) ne fonctionnent que sur les cartes 2019 (cf [#44
 ### 0. S'assurer que le système est bien à jour
 
 Le script d'installation requiert désormais une version basée sur Debian 10 (Buster), pour bénéficier de Python 3.7.
-Il est nécessaire que les headers noyau depuis le paquet `apt` correspondent à la version installée du noyau.
+
+Il est nécessaire que les 'kernel headers' installés via `apt` correspondent à la version installée du noyau.
 
 ```sh
 sudo apt update
@@ -38,9 +39,9 @@ sudo apt upgrade
 
 ### 1. Configurer les pilotes pour le son, les oreilles et le lecteur RFID et redémarrer.
 
-- Son : le pilote dépend de votre carte :
-   - Cartes Maker Faire 2018 : [pilote HiFiBerry](https://web.archive.org/web/20170914003528/support.hifiberry.com/hc/en-us/articles/205377651-Configuring-Linux-4-x-or-higher)
-   - Cartes Ulule 2019 : [pilote WM8960 - branche tagtagtag-sound](https://github.com/pguyot/wm8960/tree/tagtagtag-sound)
+- Son : le pilote dépend de votre carte TagTagTag:
+   - Carte Maker Faire 2018 : [pilote HiFiBerry](https://web.archive.org/web/20170914003528/support.hifiberry.com/hc/en-us/articles/205377651-Configuring-Linux-4-x-or-higher)
+   - Carte Ulule 2019 : [pilote WM8960 - branche tagtagtag-sound](https://github.com/pguyot/wm8960/tree/tagtagtag-sound)
 
  - Oreilles : [pilote tagtagtag-ears](https://github.com/pguyot/tagtagtag-ears)
 
