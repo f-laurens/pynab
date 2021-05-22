@@ -32,17 +32,18 @@ class aqicnClient:
 
     def _aqicn_url(self, lat, lon):
         """Select AQICN URL to use"""
+        """Note: Using f-laurens token"""
         if lat and lon:
             # Use geolocalized API
             return (
                 "https://api.waqi.info/feed/geo:" + lat + ";" + lon + "/"
-                "?token=4cf7f445134f3fb69a4c3f0e5001e507a6cc386f"
+                "?token=adeaf91dbcaedc6c768e1a25156f982ee1ac5845"
             )
         else:
             # fallback to IP-based API
             return (
                 "http://api.waqi.info/feed/here/"
-                "?token=4cf7f445134f3fb69a4c3f0e5001e507a6cc386f"
+                "?token=adeaf91dbcaedc6c768e1a25156f982ee1ac5845"
             )
 
     def _fetch_airquality_data(self):
