@@ -6,7 +6,7 @@
       <h5 class="card-title">{% trans "Air quality" %} - {{ config.localisation }}</h5>
     </div>
     <div class="card-body">
-        <p>{% trans "Air quality information is provided based on the location selected for Weather. You can select the type of information you want : Aggregate index (AQI) or just particulate matter (PM 2.5)." %}</p>
+        <p>{% trans "The " %}<a href='/help/airquality' target='_blank' title='{% trans "The air quality visual animations" %}'>{% trans "visual animation" %}</a>{% trans " displays air quality information based on the location selected for Weather. You can select the type of information you want : Aggregate index (AQI) or just particulate matter (PM 2.5)." %}</p>
         <p>{% blocktrans %}You can also ask your rabbit by saying such things as <q>What is the air quality today ?</q>.{% endblocktrans %}</p>
 
       <div class="form-group row">
