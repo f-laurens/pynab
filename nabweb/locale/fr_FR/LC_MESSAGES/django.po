@@ -153,11 +153,11 @@ msgstr ""
 #: templates/nabweb/index.html:15
 msgid ""
 "And do not forget to try <a href='/' onclick='javascript:event.target."
-"port=8080' target='_blank' rel='noopener noreferrer'>NabBlocky</a> and learn "
+"port=8080' target='_blank' rel='noopener noreferrer'>NabBlockly</a> and learn "
 "how to code with Nabaztag. It's fantastic."
 msgstr ""
 "Et n'oubliez pas d'essayer <a href='/' onclick='javascript:event.target."
-"port=8080' target='_blank' rel='noopener noreferrer'>NabBlocky</a> pour "
+"port=8080' target='_blank' rel='noopener noreferrer'>NabBlockly</a> pour "
 "apprendre à coder avec Nabaztag. C'est fantastique !"
 
 #: templates/nabweb/index.html:24 templates/nabweb/index.html:29
