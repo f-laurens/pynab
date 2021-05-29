@@ -146,7 +146,7 @@ msgstr ""
 
 #: templates/nabweb/help.html:12
 msgid ""
-"The speech processing is done locally and the answer should comme shortly!"
+"The speech processing is done locally and the answer should come shortly!"
 msgstr ""
 "La reconnaissance vocale est effectuée localement et la réponse devrait être "
 "rapide !"
