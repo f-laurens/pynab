@@ -7,7 +7,7 @@
     </div>
     <div class="card-body">
         <p>{% trans "The " %}<a class="help-link" href='/help/airquality' target='_blank' title='{% trans "The air quality visual animations" %}'>{% trans "visual animation" %}</a>{% trans " displays air quality information based on the location selected for Weather. You can select the type of information you want : Aggregate index (AQI) or just particulate matter (PM 2.5)." %}</p>
-        <p>{% blocktrans %}You can also ask your rabbit by saying such things as <q>What is the air quality today ?</q>.{% endblocktrans %}</p>
+      <p>{% trans "You can also " %}<a class="help-link" href='/help/#asr' target='_blank' title='{% trans "Speech recognition" %}'>{% trans "ask your rabbit" %}</a>{% blocktrans %} by saying such things as <q>What is the air quality today ?</q>.{% endblocktrans %}</p>
 
       <div class="form-group row">
         <label for="airqualityLocation" class="col-6 col-form-label">{% trans "Location" %}</label>

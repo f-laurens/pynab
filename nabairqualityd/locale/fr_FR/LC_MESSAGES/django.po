@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-26 13:09+0200\n"
+"POT-Creation-Date: 2021-05-30 14:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,11 +58,20 @@ msgstr ""
 "Indice agrégé (AQI) ou simplement les particules fines (PM 2.5)."
 
 #: templates/nabairqualityd/settings.html:10
-msgid ""
-"You can also ask your rabbit by saying such things as <q>What is the air "
-"quality today ?</q>."
-msgstr ""
-"Vous pouvez aussi demander à votre lapin en disant <q>Qualité de l'air</q>."
+msgid "You can also "
+msgstr "Vous pouvez aussi "
+
+#: templates/nabairqualityd/settings.html:10
+msgid "Speech recognition"
+msgstr "Reconnaissance vocale"
+
+#: templates/nabairqualityd/settings.html:10
+msgid "ask your rabbit"
+msgstr "demander à votre lapin"
+
+#: templates/nabairqualityd/settings.html:10
+msgid " by saying such things as <q>What is the air quality today ?</q>."
+msgstr " en disant par exemple <q>Qualité de l'air</q>."
 
 #: templates/nabairqualityd/settings.html:13
 msgid "Location"
