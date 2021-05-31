@@ -4,7 +4,7 @@
 # At boot, set leds to orange.
 # At shutdown, turn leds off.
 
-import os
+import platform
 import re
 import sys
 
@@ -54,7 +54,7 @@ def set_system_led(shutdown):
     with open("/sys/class/leds/led0/trigger", "w") as f:
         f.write("none")
 
-    kernel_version = os.popen("uname -r").read()
+    kernel_version = platform.release()
     matchObj = re.match(r"[0-9]+", kernel_version)
     if matchObj:
         major_version = int(matchObj.group())
