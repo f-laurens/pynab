@@ -6,23 +6,23 @@ on:
 
 jobs:
   check_date:
-    name: 🧐 Check latest commit
+    name: Check latest commit
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.should_run.outputs.SHOULD_RUN }}
 
     steps:
-      - name: ⬇ Checkout pynab
+      - name: Checkout pynab
         uses: actions/checkout@v2
         with:
           repository: ${{ github.repository }}
 
-      - name: 🖨 Print latest commit
+      - name: Print latest commit
         shell: bash
         run: |
           echo "Last commit: ${{ github.sha }}"
 
-      - name: 🔍 Check latest commit is less than a day
+      - name: Check if latest commit is less than a day old
         id: should_run
         continue-on-error: true
         shell: bash
@@ -30,7 +30,7 @@ jobs:
           test -z $(git rev-list --after="24 hours" ${{ github.sha }}) && echo "::set-output name=SHOULD_RUN::false"
 
   test_suite:
-    name: 🧪 Test suite in Raspberry Pi OS Lite
+    name: Run test suite
     runs-on: ubuntu-latest
     needs: check_date
     if: ${{ needs.check_date.outputs.SHOULD_RUN != 'false' }}
@@ -41,7 +41,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
 
-      - name: 🚀 Run test suite in chroot
+      - name: Run test suite in chroot enviroment
         uses: pguyot/arm-runner-action@v1
         id: arm_runner_tests
         with:
@@ -56,7 +56,7 @@ jobs:
             sudo mkdir -p /run/systemd/timesync/ && sudo touch /run/systemd/timesync/synchronized
             sudo -u pi taskset -c 0 /bin/bash install.sh ci-chroot-test
 
-      - name: ⬆ Upload image if tests failed
+      - name: Upload image if tests failed
         uses: actions/upload-artifact@v2
         if: failure()
         with:
@@ -64,25 +64,26 @@ jobs:
           path: ${{ steps.arm_runner_tests.outputs.image }}
 
   build_image:
-    name: 📦 Build Image
+    name: Build Image
     runs-on: ubuntu-latest
     needs: [check_date, test_suite]
     if: ${{ needs.check_date.outputs.SHOULD_RUN != 'false' }}
 
     steps:
-      - name: ⬇ Checkout pynab
+      - name: Checkout pynab
         uses: actions/checkout@v2
         with:
           repository: ${{ github.repository }}
 
-      - name: 🏗 Define the image name
+      - name: Define the image name
         id: image_and_branch_name
         shell: bash
         run: |
-          echo ::set-output name=IMAGE_NAME_SUFFIX::nightly-$(date +"%Y-%m-%d")
+          nightly_pattern=nightly
+          echo ::set-output name=IMAGE_NAME_SUFFIX::${nightly_pattern}-$(date +"%Y-%m-%d")
           echo ::set-output name=LOCAL_BRANCH::${GITHUB_REF/refs\/heads\//}
 
-      - name: 🔧 Create a release image using chroot
+      - name: Create a release image in chroot environment
         uses: pguyot/arm-runner-action@v1
         id: arm_runner_install
         with:
@@ -97,7 +98,7 @@ jobs:
               sudo apt-get autoremove -y
               sudo apt-get clean
 
-      - name: 🗜️ Compress the release image with PiShrink
+      - name: Compress the release image with PiShrink
         shell: bash
         run: |
           mv ${{ steps.arm_runner_install.outputs.image }} pynab-${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}.img
@@ -105,7 +106,7 @@ jobs:
           sudo bash pishrink.sh -Z -a -p pynab-${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}.img
           ls -lsha
 
-      - name: 🖊 Generate release name
+      - name: Generate release name
         id: release_version
         shell: bash
         run: |
@@ -115,7 +116,7 @@ jobs:
           echo "Release name is: ${pynab_nightly_version}"
           echo "::set-output name=NAME::${pynab_nightly_version}"
 
-      - name: 🦄 Create release with image from master
+      - name: Create release with image from master
         uses: "marvinpinto/action-automatic-releases@v1.1.2"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -126,21 +127,22 @@ jobs:
           files: pynab-${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}.img.xz
 
   clean_nightly_releases:
-    name: 🧹 Remove old nightly releases
+    name: Remove old nightly releases
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇ Checkout pynab
+      - name:  Checkout pynab
         uses: actions/checkout@v2
         with:
-          # ⚠️ repository hosting the nigthly build
+          #  repository hosting the nigthly build
           repository: ${{ github.repository }}
 
-      - name: 🧹 Remove old nightly releases
+      - name: Remove old nightly releases
         shell: bash
         run: |
           keep=2
           nightly_pattern=nightly
+          hub release --include-drafts -f "%U - %T (%S) %n"
           hub release --include-drafts -f "%T (%S) %n" | grep "${nightly_pattern}" | sort -r | sed "1,${keep}d" | awk '{print $1}' | xargs --no-run-if-empty -t -n1 hub release delete
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
