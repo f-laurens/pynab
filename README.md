@@ -88,7 +88,7 @@ bash upgrade.sh
 
 ## Architecture
 
-Cf le document [PROTOCOL.md](PROTOCOL.md)
+Cf le [protocole nabd](PROTOCOL.md)
 
 - `nabd` : daemon qui gère le lapin (i/o, chorégraphies)
 - `nab8balld` : daemon pour le service gourou
