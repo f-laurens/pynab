@@ -1,4 +1,4 @@
-# [Nabaztag en Python pour Raspberry Pi](https://github.com/nabaztag2018/pynab/releases)
+# Nabaztag en Python pour Raspberry Pi
 
 [![python-lint](https://github.com/f-laurens/pynab/actions/workflows/python-lint.yml/badge.svg?branch=fl)](https://github.com/f-laurens/pynab/actions/workflows/python-lint.yml)
 [![build (qemu)](https://github.com/f-laurens/pynab/actions/workflows/arm-runner.yml/badge.svg?branch=fl)](https://github.com/f-laurens/pynab/actions/workflows/arm-runner.yml)

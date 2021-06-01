@@ -8,28 +8,28 @@ ensure the contribution process is easy and effective for everyone involved.
 
 ### Reporting bugs
 
-Please **Check [existing issues](/nabaztag2018/pynab/issues)** to make sure the
+Please **Check [existing issues](https://github.com/nabaztag2018/pynab/issues)** to make sure the
 bug was not already reported. If you are running latest release, make sure the
 bug was not fixed on master branch by checking closed issues as well.
 
 If you're unable to find an open issue addressing the problem,
-[open a new one](/nabaztag2018/pynab/issues/new). Be sure to include as much
+[open a new one](https://github.com/nabaztag2018/pynab/issues/new). Be sure to include as much
 relevant information as possible, ideally providing a reproduceable test case
 demonstrating the expected behavior that is not occurring.
 
 ### New features or changes to existing features
 
 If have new ideas but lack the skills to implement them, please discuss them
-on the [community forum](http://tagtagtag.fr/forum/). Ideas that demonstrate
+on the [community forum](https://tagtagtag.fr/forum/). Ideas that demonstrate
 a strong community demand are more likely to find skilled developers willing
 to implement them.
 
 Please note that services can be added without being integrated to pynab base
-project and could simply exploit the Nabd PROTOCOL and be installed separately.
+project and could simply exploit the [Nabd protocol](PROTOCOL.md) and be installed separately.
 
 If you intend to add a new feature or change an existing one, please engage
 discussion first about what you are proposing by filing
-[a new issue](/nabaztag2018/pynab/issues/new) or discussing it on the
+[a new issue](https://github.com/nabaztag2018/pynab/issues/new) or discussing it on the
 [Discussions page](https://github.com/nabaztag2018/pynab/discussions).
 
 ### Submitting patches
@@ -47,7 +47,7 @@ sight.
 
 ## How to work with GitHub and Pull Requests
 
-You can develop directly on your rabbit (Rasbperry Pi) that you have of course
+You can develop directly on your rabbit (Raspberry Pi) that you have of course
 configured with ssh access (make sure you changed the default password). We
 use editors with SFTP support.
 
