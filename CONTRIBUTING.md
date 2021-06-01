@@ -1,10 +1,10 @@
-# Welcome to Pynab!
+# Contribution guidelines
 
 Thank you so much for contributing to the project. All contributions are
 welcome. Please take a moment to review these guidelines. Following them will
 ensure the contribution process is easy and effective for everyone involved.
 
-## How-to contribute to Pynab
+## How to contribute to Pynab
 
 ### Reporting bugs
 
@@ -45,22 +45,7 @@ tagged [`good first issue`](https://github.com/nabaztag2018/pynab/issues?q=is%3A
 They have been especially selected as they seem not too difficult at first
 sight.
 
-## How-to test a contributor Pull Request (PR)
-
-1. Connect to your Nabaztag 🐰: `ssh pi@nabaztag.local`
-2. Go to the pynab folder: `cd /home/pi/pynab`
-3. List references in a remote repository: `git ls-remote --refs origin`
-4. Open [Pull Request (PR) page](https://github.com/nabaztag2018/pynab/pulls) and memorize the PR number you want to test
-5. Switch to the PR code, here PR #123, change number for your test: `git checkout master && git pull origin master && git fetch origin pull/123/head:pr/123 && git checkout pr/123 && git merge master`
-6. Full upgrade for changes in drivers, dependencies, data models and localisation messages: `bash upgrade.sh`
-7. Do your test 🚦
-8. Rollback to default branch: `git checkout release`
-9. Full upgrade for changes in drivers, dependencies, data models and localisation messages: `bash upgrade.sh`
-10. All done ! 🎉
-
-Then add comments on pull request 😉.
-
-## How-to work with GitHub and Pull Requests
+## How to work with GitHub and Pull Requests
 
 You can develop directly on your rabbit (Rasbperry Pi) that you have of course
 configured with ssh access (make sure you changed the default password). We
@@ -68,13 +53,12 @@ use editors with SFTP support.
 
 If you haven't done so yet, fork the repository on GitHub, then add this fork
 to your rabbit's repository.
-
 ```
+cd /home/pi/pynab
 git remote add fork https://github.com/YOUR_GITHUB_USERNAME/pynab.git
 ```
 
 To develop your code, create a local branch with a name that makes sense.
-
 ```
 git fetch origin
 git checkout -b feature-name origin/master
@@ -82,7 +66,6 @@ git checkout -b feature-name origin/master
 
 At anytime, you can run tests locally (on the rabbit) by first stopping pynab
 and services. Hardware tests require root access.
-
 ```
 sudo ./venv/bin/python manage.py stop_all
 sudo ./venv/bin/pytest
@@ -90,14 +73,12 @@ sudo ./venv/bin/python manage.py start_all
 ```
 
 Before committing your code, make sure the style is conforming by running pre-commit
-
 ```
 ./venv/bin/pre-commit
 ```
 
 Once you are happy with the result, rebase and push it to a dedicated branch on
 your own GitHub fork.
-
 ```
 git fetch origin
 git rebase origin/master
@@ -106,16 +87,14 @@ git push fork HEAD:feature-name
 
 GitHub will display the URL to create a pull request, with a git message such
 as:
-
 ```
 remote:
 remote: Create a pull request for 'branch-name' on GitHub by visiting:
 remote:      https://github.com/user/pynab/pull/new/branch-name
 remote:
 ```
-
 Then create your pull request, adding relevant comments.
-If your pull request is related to an open issue XXX, make sure your initial comment
+If your pull request is related to an open issue *XXX*, make sure your initial comment
 starts with *Resolves #XXX*, so that the pull request is automatically linked to the issue.
 
 Tests will be run through GitHub Actions, covering code style, code quality
@@ -125,12 +104,25 @@ If tests fail, fix them and push to the branch, either with new commits or
 by amending. Once tests pass, your request will be reviewed.
 
 At any time, if you did commit your changes, you can go back to master with:
-
 ```
 git fetch origin
 git checkout master
 bash upgrade.sh
 ```
 
-The last command is required to run a full upgrade for changes in localized
+The last command is required to run a full upgrade for any changes in localized
 messages, drivers and dependencies.
+
+## How to test a contributor Pull Request
+
+1. Go to the pynab folder on your rabbit: `cd /home/pi/pynab`
+2. List references in remote repository: `git ls-remote --refs origin`
+3. Open [Pull requests page](https://github.com/nabaztag2018/pynab/pulls) and note the number of the PR you want to test
+4. Switch to the corresponding PR branch (here for PR *#123*): `git checkout master && git pull origin master && git fetch origin pull/123/head:pr/123 && git checkout pr/123 && git merge master`
+5. Do full upgrade for any changes in drivers, dependencies, data models and localisation messages: `bash upgrade.sh`
+6. Do your tests
+7. Rollback to default branch: `git checkout release`
+8. Do full upgrade to rollback any changes in drivers, dependencies, data models and localisation messages: `bash upgrade.sh`
+9. All done !
+
+Then add comments on Pull Request as appropriate.

@@ -1,4 +1,4 @@
-# Nabaztag en Python pour Raspberry Pi
+# [Nabaztag en Python pour Raspberry Pi](https://github.com/nabaztag2018/pynab/releases)
 
 [![python-lint](https://github.com/f-laurens/pynab/actions/workflows/python-lint.yml/badge.svg?branch=fl)](https://github.com/f-laurens/pynab/actions/workflows/python-lint.yml)
 [![build (qemu)](https://github.com/f-laurens/pynab/actions/workflows/arm-runner.yml/badge.svg?branch=fl)](https://github.com/f-laurens/pynab/actions/workflows/arm-runner.yml)
@@ -88,7 +88,7 @@ bash upgrade.sh
 
 ## Architecture
 
-Cf le document [PROTOCOL.md](PROTOCOL.md)
+Cf le [protocole nabd](PROTOCOL.md)
 
 - `nabd` : daemon qui gère le lapin (i/o, chorégraphies)
 - `nab8balld` : daemon pour le service gourou
