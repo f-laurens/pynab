@@ -85,6 +85,7 @@ class aqicnClient:
             self._city = city
 
         except Exception as err:
+            logging.critical(f"connection error: {err}")
             raise aqicnError(err)
 
     def get_data(self):
