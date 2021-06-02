@@ -120,6 +120,7 @@ messages, drivers and dependencies.
 3. Open [Pull requests page](https://github.com/nabaztag2018/pynab/pulls) and note the number of the PR you want to test
 4. Switch to the corresponding PR branch (here for PR *#123*): `git checkout master && git pull origin master && git fetch origin pull/123/head:pr/123 && git checkout pr/123 && git merge master`
 5. Do full upgrade for any changes in drivers, dependencies, data models and localisation messages: `bash upgrade.sh`
+5. Do full upgrade for any changes in drivers, dependencies, data models and localisation messages: `bash install.sh --upgrade`
 6. Do your tests
 7. Rollback to default branch: `git checkout release`
 8. Do full upgrade to rollback any changes in drivers, dependencies, data models and localisation messages: `bash upgrade.sh`
