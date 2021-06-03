@@ -115,14 +115,26 @@ messages, drivers and dependencies.
 
 ## How to test a contributor Pull Request
 
-1. Go to the pynab folder on your rabbit: `cd /home/pi/pynab`
-2. List references in remote repository: `git ls-remote --refs origin`
-3. Open [Pull requests page](https://github.com/nabaztag2018/pynab/pulls) and note the number of the PR you want to test
-4. Switch to the corresponding PR branch (here for PR *#123*): `git checkout master && git pull origin master && git fetch origin pull/123/head:pr/123 && git checkout pr/123 && git merge master`
-5. Do full upgrade for any changes in drivers, dependencies, data models and localisation messages: `bash install.sh --upgrade`
-6. Do your tests
-7. Rollback to default branch: `git checkout release`
-8. Do full upgrade to rollback any changes in drivers, dependencies, data models and localisation messages: `bash upgrade.sh`
-9. All done !
+1. Note the number *XXX* of the PR to test from the [Pull requests page](https://github.com/nabaztag2018/pynab/pulls).
+
+2. Go to the pynab folder on your rabbit: `cd /home/pi/pynab`
+
+3. Checkout *PR #XXX* to a new local branch *prxxx* (see [Checking out GitHub pull requests locally](https://docs.github.com/en/github/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/checking-out-pull-requests-locally))
+
+4. Switch to this branch: `git checkout prxxx`
+
+5. Prepare Pynab environment for testing:
+    - if needed (when PR has changes in drivers, dependencies, data models or localisation messages) do a full upgrade: `bash install.sh --upgrade`
+    - otherwise just restart the Pynab services: `sudo ./venv/bin/python manage.py stop_all && sudo ./venv/bin/python manage.py start_all`
+
+6. Do your tests...
+
+7. Switch back to default (master or release) branch: `git checkout master`
+
+8. Rollback Pynab environment:
+     - if needed (when PR had changes in drivers, dependencies, data models or localisation messages) do a full upgrade: `bash upgrade.sh`
+     - otherwise just restart the Pynab services: `sudo ./venv/bin/python manage.py stop_all && sudo ./venv/bin/python manage.py start_all`
+
+9. All done! You can delete your test branch: `git branch -D prxxx`
 
 Then add comments on Pull Request as appropriate.
