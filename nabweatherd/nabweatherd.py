@@ -14,6 +14,10 @@ from nabcommon.nabservice import NabInfoService
 from . import rfid_data
 
 
+class meteoError(Exception):
+    """Raise when errors occur while fetching or parsing data"""
+
+
 class NabWeatherd(NabInfoService):
     UNIT_CELSIUS = 1
     UNIT_FARENHEIT = 2
@@ -401,9 +405,13 @@ class NabWeatherd(NabInfoService):
         place = Place(location_string_json)
 
         client = await sync_to_async(MeteoFranceClient)()
-        my_place_weather_forecast = client.get_forecast_for_place(place)
-        data = my_place_weather_forecast.daily_forecast
-        logging.debug(f"data: {data}")
+        try:
+            my_place_weather_forecast = client.get_forecast_for_place(place)
+            data = my_place_weather_forecast.daily_forecast
+            logging.debug(f"data: {data}")
+        except Exception as err:
+            logging.critical(f"connection error: {err}")
+            raise meteoError(err)
 
         # Rain info
         next_rain = False
