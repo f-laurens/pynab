@@ -1,4 +1,3 @@
-# import logging
 import os
 import random
 from pathlib import Path
@@ -77,10 +76,6 @@ class Resources(object):
             ]:
                 if path.is_dir():
                     filelist = filelist + list(path.glob(pattern))
-        # logging.debug(
-        #     f"Possible selections for {str(type)} resource {str(pattern)}"
-        #     f" in {str(parent)}: {str(filelist)}"
-        # )
         if filelist != []:
             return random.choice(sorted(filelist))
         return None

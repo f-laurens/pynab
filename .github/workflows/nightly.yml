@@ -142,7 +142,7 @@ jobs:
         run: |
           keep=2
           nightly_pattern=nightly
-          hub release --include-drafts -f "%U - %T (%S) %n"
+          hub release --include-drafts -f "%T (%S) %n" | grep "${nightly_pattern}" | sort -r
           hub release --include-drafts -f "%T (%S) %n" | grep "${nightly_pattern}" | sort -r | sed "1,${keep}d" | awk '{print $1}' | xargs --no-run-if-empty -t -n1 hub release delete
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
