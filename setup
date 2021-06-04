@@ -108,5 +108,5 @@ sudo -u pi /bin/bash install.sh ci-chroot
 
 echo "Cleaning up."
 # Cleanup any leftovers (from Kaldi install).
-sudo find / -name "._*" -exec rm {} \;
-sudo find / -user 501 -exec chown -h root:root {} \;
+sudo find / -xdev -name "._*" -exec rm {} \;
+sudo find / -xdev -user 501 -exec chown -h root:root {} \;
