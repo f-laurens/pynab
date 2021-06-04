@@ -6,11 +6,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run tests in chroot
-      uses: pguyot/arm-runner-action@v1
+      uses: f-laurens/arm-runner-action@v1
       id: arm_runner_tests
       with:
         image_additional_mb: 3584
-        base_image: 'raspios_lite:2021-03-04'
+        base_image: 'raspios_lite:2021-05-07'
         cpu: 'arm1176'
         copy_repository_path: /home/pi/pynab
         commands: |
@@ -44,11 +44,11 @@ jobs:
           echo ::set-output name=LOCAL_BRANCH::${GITHUB_REF/refs\/heads\//}
         fi
     - name: Create a release image using chroot
-      uses: pguyot/arm-runner-action@v1
+      uses: f-laurens/arm-runner-action@v1
       id: arm_runner_install
       with:
         image_additional_mb: 3584
-        base_image: 'raspios_lite:2021-03-04'
+        base_image: 'raspios_lite:2021-05-07'
         cpu: 'arm1176'
         commands: |
             echo GITHUB_BRANCH=${{ steps.image_and_branch_name.outputs.LOCAL_BRANCH }}
