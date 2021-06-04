@@ -10,6 +10,11 @@ IFS=$'\n\t'
 GPU_MEM=16
 LC_ALL=C
 
+install_env="ci-chroot"
+if [ "${1:-}" == "--local" ]; then
+  install_env=""
+fi
+
 # Replace /boot/cmdline.txt since it contains root device mapping to a PARTUUID that 
 # changed during parted resize.
 echo "Replacing /boot/cmdline.txt."
@@ -61,9 +66,9 @@ echo "Installing required packages."
 sudo apt update -y
 sudo apt dist-upgrade -y
 sudo apt-get install --no-install-recommends -y postgresql libpq-dev git python3 python3-venv python3-dev gettext nginx openssl libssl-dev libffi-dev libmpg123-dev libasound2-dev libatlas-base-dev libgfortran3 libopenblas-dev liblapack-dev zram-tools
+sudo apt-get install --no-install-recommends raspberrypi-kernel-headers
 
 echo "Installing sound driver for Ulule 2019 cards."
-sudo apt-get install --no-install-recommends raspberrypi-kernel-headers
 cd /home/pi
 sudo -u pi git clone --depth 1 -b tagtagtag-sound https://github.com/pguyot/wm8960
 cd /home/pi/wm8960
@@ -89,7 +94,7 @@ make clean
 
 repository=${GITHUB_REPOSITORY:-nabaztag2018/pynab}
 branch=${GITHUB_BRANCH:-release}
-echo "Cloning pynab ${branch} branch from ${repository}"
+echo "Cloning Pynab ${branch} branch from ${repository}."
 cd /home/pi
 sudo -u pi git clone --depth 1 -b ${branch} https://github.com/${repository}.git
 
@@ -104,7 +109,7 @@ sudo -u pi ./rebar3 release
 
 echo "Running Pynab install script."
 cd /home/pi/pynab
-sudo -u pi /bin/bash install.sh ci-chroot
+sudo -u pi /bin/bash install.sh ${install_env}
 
 echo "Cleaning up."
 # Cleanup any leftovers (from Kaldi install).
