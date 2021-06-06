@@ -102,8 +102,8 @@ jobs:
         shell: bash
         run: |
           mv ${{ steps.arm_runner_install.outputs.image }} pynab-${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}.img
-          wget https://raw.githubusercontent.com/Drewsif/PiShrink/HEAD/pishrink.sh
-          sudo bash pishrink.sh -Z -a -p pynab-${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}.img
+          wget https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
+          sudo bash pishrink.sh -Z -a pynab-${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}.img
           ls -lsha
 
       - name: Generate release name
@@ -142,7 +142,8 @@ jobs:
         run: |
           keep=2
           nightly_pattern=nightly
-          hub release --include-drafts -f "%T (%S) - %U %n" | grep "${nightly_pattern}" | sort -r
-          hub release --include-drafts -f "%T (%S) %n" | grep "${nightly_pattern}" | sort -r | sed "1,${keep}d" | awk '{print $1}' | xargs --no-run-if-empty -t -n1 hub release delete
+          old_releases=$(git tag | grep "^${nightly_pattern}" | sort -r | sed "1,${keep}d")
+          echo ${old_releases} | xargs --no-run-if-empty -t git tag -d
+          echo ${old_releases} | xargs --no-run-if-empty -t -n1 hub release delete
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
