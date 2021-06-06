@@ -344,7 +344,7 @@ class NabWebSytemInfoView(BaseView):
             f"{version} - "
             f"Kernel {kernel_release} {kernel_build} {kernel_machine}"
         )
-        hostname = os.popen("hostname -a").read().rstrip()
+        hostname = os.popen("hostname").read().rstrip()
         ip_address = os.popen("hostname -I").read().rstrip()
         wifi_essid = os.popen("iwgetid -r").read().rstrip()
         try:
