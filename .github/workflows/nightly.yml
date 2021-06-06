@@ -36,7 +36,7 @@ jobs:
     if: ${{ needs.check_date.outputs.SHOULD_RUN != 'false' }}
 
     steps:
-      - name: ⬇ Checkout pynab
+      - name: Checkout pynab
         uses: actions/checkout@v2
         with:
           repository: ${{ github.repository }}
@@ -142,8 +142,11 @@ jobs:
         run: |
           keep=2
           nightly_pattern=nightly
-          old_releases=$(git tag | grep "^${nightly_pattern}" | sort -r | sed "1,${keep}d")
-          echo ${old_releases} | xargs --no-run-if-empty -t git tag -d
-          echo ${old_releases} | xargs --no-run-if-empty -t -n1 hub release delete
+          old_tags=$(git tag -l | grep "^${nightly_pattern}" | sort -r | sed "1,${keep}d")
+          echo "Old tags to delete: ${old_tags}"
+          old_builds=$(hub release | grep "^${nightly_pattern}" | sort -r | sed "1,${keep}d")
+          echo "Old builds to delete: ${old_builds}"
+          echo ${old_builds} | xargs --no-run-if-empty -t -n1 hub release delete
+          echo ${old_tags} | xargs --no-run-if-empty -t git tag -d
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
