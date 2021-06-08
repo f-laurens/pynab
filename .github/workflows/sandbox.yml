@@ -1,5 +1,4 @@
----
-name: Sand box
+name: 🃏 Sand box
 on: workflow_dispatch
 
 jobs:

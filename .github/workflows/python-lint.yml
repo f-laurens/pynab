@@ -1,6 +1,11 @@
-name: python-lint
+name: ✔️  Python lint
 
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - 'releng'
 
 jobs:
   lint:
