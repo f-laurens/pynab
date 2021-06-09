@@ -84,6 +84,8 @@ jobs:
       uses: "marvinpinto/action-automatic-releases@v1.1.2"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: ${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}
         prerelease: false
         draft: true
+        title: ${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}
         files: pynab-${{ steps.image_and_branch_name.outputs.IMAGE_NAME_SUFFIX }}.img.xz
