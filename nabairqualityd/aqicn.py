@@ -9,7 +9,8 @@ import logging
 import requests
 
 AQICN_FEED = "http://api.waqi.info/feed/"
-AQICN_TOKEN = "4cf7f445134f3fb69a4c3f0e5001e507a6cc386f"
+"""Note: Using f-laurens token"""
+AQICN_TOKEN = "adeaf91dbcaedc6c768e1a25156f982ee1ac5845"
 
 
 class aqicnError(Exception):
