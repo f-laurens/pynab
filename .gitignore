@@ -108,6 +108,7 @@ venv.bak/
 
 # tmp
 tmp/
+/sound_alsa_recording.raw
 
 # nabblockly subdirectory
 /nabblockly/
