@@ -1,0 +1,57 @@
+name: 🃏 Sand box
+on: workflow_dispatch
+
+jobs:
+
+  check_date:
+    name: Check latest commit
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.should_run.outputs.SHOULD_RUN }}
+
+    steps:
+      - name: Checkout pynab
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.repository }}
+
+      - name: Print latest commit
+        shell: bash
+        run: |
+          echo "Last commit: ${{ github.sha }}"
+      - name: Check if latest commit is less than a day old
+        id: should_run
+        shell: bash
+        run: |
+          test -z $(git rev-list --after="24 hours" ${{ github.sha }}) && echo "::set-output name=SHOULD_RUN::false" || echo "::set-output name=SHOULD_RUN::true"
+
+  clean_nightly_releases:
+    name: Clean old nightly releases
+    runs-on: ubuntu-latest
+    needs: check_date
+    if: ${{ needs.check_date.outputs.SHOULD_RUN == 'true' }}
+
+    steps:
+      - name: Checkout pynab with tags
+        uses: actions/checkout@v2
+        with:
+          # repository hosting the nigthly build
+          repository: ${{ github.repository }}
+          # all history for tags
+          fetch-depth: 0
+
+      - name: Clean old nightly releases
+        shell: bash
+        run: |
+          keep=2
+          nightly_pattern=nightly
+          origin=origin
+          old_tags=$(git tag -l | (grep "^${nightly_pattern}" ; true) | sort -r | sed "1,${keep}d" | tr '\n' ' ')
+          old_builds=$(hub release --include-drafts | (grep "^${nightly_pattern}" ; true) | sort -r | sed "1,${keep}d" | tr '\n' ' ')
+          echo "Old tags to delete:   ${old_tags}"
+          echo "Old builds to delete: ${old_builds}"
+          echo ${old_builds} | xargs --no-run-if-empty -t -n1 hub release delete
+          echo ${old_tags} | xargs --no-run-if-empty -t git push --delete ${origin}
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,13 @@
 name: ✔️  Python lint
 
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - 'fl[0-9]+.[0-9]+.[0-9]+*'
+      - 'fx[0-9]+.[0-9]+.[0-9]+*'
+    branches:
+      - 'releng'
 
 jobs:
   lint:
