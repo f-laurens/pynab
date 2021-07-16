@@ -28,7 +28,7 @@ case $step in
   
     sudo -u ${owner} touch /tmp/pynab.upgrade
     sudo chown ${owner} /tmp/pynab.upgrade
-    echo "Updating code - 1/?" > /tmp/pynab.upgrade
+    echo "Updating Pynab - 1/?" > /tmp/pynab.upgrade
     cd ${root_dir}
     if [[ $EUID -ne ${ownerid} ]]; then
       sudo -u ${owner} git pull

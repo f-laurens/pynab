@@ -1,6 +1,6 @@
 {% extends 'nabweb/_base.html' %}
 {% load i18n %}
-{% block subtitle %}{% trans "Home" %}{% endblock %}
+{% block subtitle %}{% trans "Upgrade" %}{% endblock %}
 {% block content %}
   <div class="modal" tabindex="-1" role="dialog" id="upgradeModal">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -69,6 +69,11 @@
             {% include "nabweb/upgrade/_repository.html" with repo=nabblockly %}
           {% else %}
             <div data-repository="nabblockly" class="async-repository-info"></div>
+          {% endif %}
+          {% if pynab_cli %}
+            {% include "nabweb/upgrade/_repository.html" with repo=pynab_cli %}
+          {% else %}
+            <div data-repository="pynab_cli" class="async-repository-info"></div>
           {% endif %}
           </dl>
           <strong>{% trans "Last check:" %}</strong> {% blocktrans with last_check_since=last_check|timesince %}{{ last_check_since }} ago{% endblocktrans %}

@@ -30,7 +30,7 @@ elif [ "${1:-}" == "test" ]; then
   test=1
 elif [ "${1:-}" == "--upgrade" ]; then
   upgrade=1
-  # auto-detect maker faire card here.
+  # auto-detect Maker Faire card here.
   if [ `sudo aplay -L | grep -c "hifiberry"` -gt 0 ]; then
     makerfaire2018=1
   fi
@@ -71,7 +71,7 @@ if [ $makerfaire2018 -eq 1 ]; then
 fi
 
 if [ $upgrade -eq 1 -a $makerfaire2018 -eq 0 -a -d ${home_dir}/wm8960 ]; then
-  echo "Updating sound driver - 2/14" > /tmp/pynab.upgrade
+  echo "Updating sound driver - 2/15" > /tmp/pynab.upgrade
   cd ${home_dir}/wm8960
   sudo chown -R ${owner} .git
   pull=`git pull`
@@ -82,7 +82,7 @@ if [ $upgrade -eq 1 -a $makerfaire2018 -eq 0 -a -d ${home_dir}/wm8960 ]; then
 fi
 
 if [ $upgrade -eq 1 ]; then
-  echo "Updating ears driver - 3/14" > /tmp/pynab.upgrade
+  echo "Updating ears driver - 3/15" > /tmp/pynab.upgrade
   if [ -d ${home_dir}/tagtagtag-ears ]; then
     cd ${home_dir}/tagtagtag-ears
     sudo chown -R ${owner} .git
@@ -106,7 +106,7 @@ else
 fi
 
 if [ $upgrade -eq 1 ]; then
-  echo "Updating RFID driver - 4/14" > /tmp/pynab.upgrade
+  echo "Updating RFID driver - 4/15" > /tmp/pynab.upgrade
   if [ -d ${home_dir}/cr14 ]; then
     cd ${home_dir}/cr14
     sudo chown -R ${owner} .git
@@ -130,7 +130,7 @@ else
 fi
 
 if [ $upgrade -eq 1 ]; then
-  echo "Updating nabblockly - 5/14" > /tmp/pynab.upgrade
+  echo "Updating NabBlockly - 5/15" > /tmp/pynab.upgrade
   if [ -d ${root_dir}/nabblockly ]; then
     cd ${root_dir}/nabblockly
     sudo chown -R ${owner} .
@@ -139,23 +139,47 @@ if [ $upgrade -eq 1 ]; then
       ./rebar3 release
     fi
   else
-    echo "You may want to install nabblockly from https://github.com/pguyot/nabblockly"
+    echo "You may want to install NabBlockly from https://github.com/pguyot/nabblockly"
   fi
 else
   if [ $ci_chroot -eq 0 -a ! -d "${root_dir}/nabblockly" ]; then
-    echo "You may want to install nabblockly from https://github.com/pguyot/nabblockly"
+    echo "You may want to install NabBlockly from https://github.com/pguyot/nabblockly"
+  fi
+fi
+
+if [ $upgrade -eq 1 ]; then
+  echo "Updating Pynab CLI - 6/15" > /tmp/pynab.upgrade
+  if [ -d ${home_dir}/pynab_cli ]; then
+    cd ${home_dir}/pynab_cli
+    sudo chown -R ${owner} .
+    pull=`git pull`
+    if [ "$pull" != "Already up to date." ]; then
+      sudo -u ${owner} mkdir -p ${home_dir}/bin
+      cd ${home_dir}/bin
+      sudo -u ${owner} ln -fs ../pynab_cli/bin/* .
+    fi
+  else
+    cd ${home_dir}
+    git clone -b release https://github.com/f-laurens/pynab_cli
+    sudo -u ${owner} mkdir -p ${home_dir}/bin
+    cd ${home_dir}/bin
+    sudo -u ${owner} ln -fs ../pynab_cli/bin/* .
+  fi
+else
+  if [ $ci_chroot -eq 0 -a ! -d "${home_dir}/pynab_cli" ]; then
+    echo "You may want to install Pynab CLI from https://github.com/f-laurens/pynab_cli"
   fi
 fi
 
 cd ${home_dir}
 if [ $makerfaire2018 -eq 0 ]; then
   if [ $upgrade -eq 1 ]; then
-    echo "Updating ASR models - 6/14" > /tmp/pynab.upgrade
+    echo "Updating ASR models - 7/15" > /tmp/pynab.upgrade
   fi
 
-  # maker faire card has no mic, no need to install kaldi
+  # Maker Faire card has no mic, no need to install Kaldi
   if [ ! -d "/opt/kaldi" ]; then
-    echo "Installing precompiled kaldi into /opt"
+    echo "Installing precompiled Kaldi into /opt"
     wget -O - -q https://github.com/pguyot/kaldi/releases/download/v5.4.1/kaldi-c3260f2-linux_armv6l-vfp.tar.xz | sudo tar xJ -C /
     sudo ldconfig
   fi
@@ -163,12 +187,12 @@ if [ $makerfaire2018 -eq 0 ]; then
   sudo mkdir -p "/opt/kaldi/model"
 
   if [ ! -d "/opt/kaldi/model/kaldi-nabaztag-en-adapt-r20191222" ]; then
-    echo "Uncompressing kaldi model for English"
+    echo "Installing Kaldi model for English"
     sudo tar xJf ${root_dir}/asr/kaldi-nabaztag-en-adapt-r20191222.tar.xz -C /opt/kaldi/model/
   fi
 
   if [ ! -d "/opt/kaldi/model/kaldi-nabaztag-fr-adapt-r20200203" ]; then
-    echo "Uncompressing kaldi model for French"
+    echo "Installing Kaldi model for French"
     sudo tar xJf ${root_dir}/asr/kaldi-nabaztag-fr-adapt-r20200203.tar.xz -C /opt/kaldi/model/
   fi
 fi
@@ -176,7 +200,7 @@ fi
 cd ${root_dir}
 if [ ! -d "venv" ]; then
   if ! [ -x "$(command -v python3.7)" ] ; then
-    echo "Please install Python 3.7 (you might need to upgrade your Raspbian distribution)"
+    echo "Please install Python 3.7 (you might need to upgrade your Linux distribution)"
     exit 1
   fi
 
@@ -186,7 +210,7 @@ fi
 
 echo "Installing PyPi requirements"
 if [ $upgrade -eq 1 ]; then
-  echo "Updating Python requirements - 7/14" > /tmp/pynab.upgrade
+  echo "Updating Python requirements - 8/15" > /tmp/pynab.upgrade
 fi
 # Start with wheel which is required to compile some of the other requirements
 venv/bin/pip install --no-cache-dir wheel
@@ -194,26 +218,26 @@ venv/bin/pip install --no-cache-dir -r requirements.txt
 
 if [ $makerfaire2018 -eq 0 ]; then
   if [ $upgrade -eq 1 ]; then
-    echo "Updating NLU models - 8/14" > /tmp/pynab.upgrade
+    echo "Updating NLU models - 9/15" > /tmp/pynab.upgrade
   fi
 
   # maker faire card has no mic, no need to install snips
   if [ ! -d "venv/lib/python3.7/site-packages/snips_nlu_fr" ]; then
-    echo "Downloading snips_nlu models for French"
+    echo "Downloading Snips NLU models for French"
     venv/bin/python -m snips_nlu download fr
   fi
 
   if [ ! -d "venv/lib/python3.7/site-packages/snips_nlu_en" ]; then
-    echo "Downloading snips_nlu models for English"
+    echo "Downloading Snips NLU models for English"
     venv/bin/python -m snips_nlu download en
   fi
 
-  echo "Compiling snips datasets"
+  echo "Compiling Snips datasets"
   mkdir -p nabd/nlu
   venv/bin/python -m snips_nlu generate-dataset en */nlu/intent_en.yaml > nabd/nlu/nlu_dataset_en.json
   venv/bin/python -m snips_nlu generate-dataset fr */nlu/intent_fr.yaml > nabd/nlu/nlu_dataset_fr.json
 
-  echo "Persisting snips engines"
+  echo "Persisting Snips engines"
   if [ -d nabd/nlu/engine_en ]; then
     rm -rf nabd/nlu/engine_en
   fi
@@ -245,7 +269,7 @@ fi
 sudo sed -e "s|/home/pi/pynab|${root_dir}|g" < nabweb/nginx-site.conf > /tmp/nginx-site.conf
 if [ $upgrade -eq 0 ]; then
   if [ ! -e '/etc/nginx/sites-enabled/pynab' ]; then
-    echo "Installing nginx configuration file"
+    echo "Installing Nginx configuration file"
     if [ -h '/etc/nginx/sites-enabled/default' ]; then
       sudo rm /etc/nginx/sites-enabled/default
     fi
@@ -255,7 +279,7 @@ if [ $upgrade -eq 0 ]; then
     fi
   else
     diff -q '/etc/nginx/sites-enabled/pynab' /tmp/nginx-site.conf >/dev/null || {
-      echo "Updating nginx configuration file"
+      echo "Updating Nginx configuration file"
       sudo mv /tmp/nginx-site.conf /etc/nginx/sites-enabled/pynab
       if [ $ci_chroot -eq 0 ]; then
         sudo systemctl restart nginx
@@ -263,7 +287,7 @@ if [ $upgrade -eq 0 ]; then
     }
   fi
 else
-  echo "Restarting Nginx - 9/14" > /tmp/pynab.upgrade
+  echo "Restarting Nginx - 10/15" > /tmp/pynab.upgrade
   if [ -e '/etc/nginx/sites-enabled/pynab' ]; then
     sudo mv /tmp/nginx-site.conf /etc/nginx/sites-enabled/pynab
     sudo systemctl restart nginx
@@ -279,7 +303,7 @@ psql -U pynab -c '' 2>/dev/null || {
 }
 
 if [ $upgrade -eq 1 ]; then
-  echo "Updating data models - 10/14" > /tmp/pynab.upgrade
+  echo "Updating data models - 11/15" > /tmp/pynab.upgrade
 fi
 venv/bin/python manage.py migrate
 
@@ -288,7 +312,7 @@ all_locales="-l fr_FR -l de_DE -l en_US -l en_GB -l it_IT -l es_ES -l ja_jp -l p
 if [ $upgrade -eq 0 ]; then
   venv/bin/django-admin compilemessages ${all_locales}
 else
-  echo "Updating localization messages - 11/14" > /tmp/pynab.upgrade
+  echo "Updating localization messages - 12/15" > /tmp/pynab.upgrade
   for module in nab*/locale; do
     (
       cd `dirname ${module}`
@@ -312,7 +336,7 @@ fi
 
 # copy service files
 if [ $upgrade -eq 1 ]; then
-  echo "Installing service files - 12/14" > /tmp/pynab.upgrade
+  echo "Installing service files - 13/15" > /tmp/pynab.upgrade
 fi
 for service_file in nabd/nabd.socket */*.service ; do
   name=`basename ${service_file}`
@@ -327,6 +351,7 @@ sudo chown root /lib/systemd/system-shutdown/nabboot.py
 sudo chmod +x /lib/systemd/system-shutdown/nabboot.py
 
 # setup Pynab logs rotation
+echo "Setting up Pynab logs rotation"
 cat > '/tmp/pynab' <<- END
 /var/log/nab*.log {
   weekly
@@ -343,6 +368,7 @@ sudo chown root:root /etc/logrotate.d/pynab
 
 # advertise rabbit on local network
 if [ ! -f "/etc/avahi/services/pynab.service" ]; then
+  echo "Setting up Avahi service for Pynab"
   cat > '/tmp/pynab.service' <<- END
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
@@ -360,6 +386,7 @@ END
   sudo mv /tmp/pynab.service /etc/avahi/services/pynab.service
 fi
 if [ ! -f "/etc/avahi/services/nabblocky.service" ]; then
+  echo "Setting up Avahi service for NabBlockly"
   cat > '/tmp/nabblocky.service' <<- END
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
@@ -378,14 +405,14 @@ END
 fi
 
 if [ -e /tmp/pynab.upgrade.reboot ]; then
-  echo "Upgrade requires reboot, rebooting now - 14/14" > /tmp/pynab.upgrade
+  echo "Upgrade requires reboot, rebooting now - 15/15" > /tmp/pynab.upgrade
   sudo rm -f /tmp/pynab.upgrade
   sudo rm -f /tmp/pynab.upgrade.reboot
   sudo reboot
 else
   if [ $ci_chroot -eq 0 ]; then
     if [ $upgrade -eq 1 ]; then
-      echo "Restarting services - 13/14" > /tmp/pynab.upgrade
+      echo "Restarting services - 14/15" > /tmp/pynab.upgrade
     fi
     sudo systemctl restart logrotate.service || true
     sudo systemctl start nabd.socket
@@ -400,7 +427,7 @@ else
     done
 
     if [ $upgrade -eq 1 ]; then
-      echo "Restarting website - 14/14" > /tmp/pynab.upgrade
+      echo "Restarting web site - 15/15" > /tmp/pynab.upgrade
       sudo systemctl restart nabweb.service
     else
       sudo systemctl start nabweb.service

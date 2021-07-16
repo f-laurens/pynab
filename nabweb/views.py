@@ -437,6 +437,7 @@ class GitInfo:
         "ears_driver": "../tagtagtag-ears/",
         "rfid_driver": "../cr14/",
         "nabblockly": "nabblockly",
+        "pynab_cli": "../pynab_cli/",
     }
     NAMES = {
         "pynab": "Pynab",
@@ -444,6 +445,7 @@ class GitInfo:
         "ears_driver": "Ears driver",
         "rfid_driver": "RFID reader driver",
         "nabblockly": "NabBlockly",
+        "pynab_cli": "Pynab CLI",
     }
 
     @staticmethod

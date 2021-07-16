@@ -229,6 +229,14 @@ sudo -u ${owner} wget https://github.com/erlang/rebar3/releases/download/3.15.1/
 sudo apt-get install --no-install-recommends -y g++
 sudo -u ${owner} ./rebar3 release
 
+echo "Installing Pynab CLI."
+sudo apt-get install --no-install-recommends -y netcat-openbsd
+cd ${home_dir}
+sudo -u ${owner} git clone --depth 1 -b release https://github.com/f-laurens/pynab_cli
+sudo -u ${owner} mkdir -p ${home_dir}/bin
+cd ${home_dir}/bin
+sudo -u ${owner} ln -fs ../pynab_cli/bin/* .
+
 echo "Running Pynab install script."
 sudo apt-get install --no-install-recommends -y alsa-utils xz-utils avahi-daemon
 cd ${home_dir}/pynab
