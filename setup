@@ -34,18 +34,16 @@ esac
 
 LC_ALL=C
 
-if [ -f "/etc/rpi-issue" ]
+if [ -d "/boot/dietpi" ]
 then
-    if [ -d "/boot/dietpi" ]
-    then
-        # DietPi distro
-        owner=dietpi
-        home_dir=/home/${owner}
-    else
-        # assume Raspberry Pi OS distro
-        owner=pi
-        home_dir=/home/${owner}
-    fi
+    # DietPi distro
+    owner=dietpi
+    home_dir=/home/${owner}
+elif [ -f "/etc/rpi-issue" ]
+then
+    # Raspberry Pi OS distro
+    owner=pi
+    home_dir=/home/${owner}
 else
     echo "$(basename ${0}): unsupported Linux distribution!"
     exit 3
@@ -179,16 +177,27 @@ then
 fi
 echo "Ensuring user ${owner} has appropriate sudo privileges."
 usermod -aG sudo ${owner}
+
 if [ "${owner}" == "dietpi" ]
 then
     # patch for DietPi, to allow sudo -u: ALL=(ALL) needed:
     echo "${owner} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${owner}
+
+    # patch for DietPi, to take over existing local Pynab repository, if any:
+    pi_user="pi"
+    if [ ! -d ${home_dir}/pynab -a -d /home/${pi_user}/pynab ]
+    then
+	echo "Moving /home/${pi_user}/pynab to ${home_dir}/pynab."
+	mv /home/${pi_user}/pynab ${home_dir}/pynab
+	chown -hR ${owner}:${owner} ${home_dir}/pynab
+	userdel -r ${pi_user} 2>/dev/null || true
+    fi
 fi
 
 echo "Installing required packages."
 sudo apt-get update -y
 sudo apt-get dist-upgrade -y
-sudo apt-get install --no-install-recommends -y postgresql libpq-dev git python3 python3-venv python3-dev gettext nginx openssl libssl-dev libffi-dev libmpg123-dev libasound2-dev libatlas-base-dev libgfortran3 libopenblas-dev liblapack-dev zram-tools
+sudo apt-get install --no-install-recommends -y postgresql libpq-dev git python3 python3-venv python3-dev gettext nginx openssl libssl-dev libffi-dev libmpg123-dev libasound2-dev libatlas-base-dev libgfortran5 libopenblas-dev liblapack-dev zram-tools
 sudo apt-get install --no-install-recommends -y gcc make raspberrypi-kernel-headers
 
 echo "Installing sound driver for Ulule 2019 cards."
@@ -215,9 +224,14 @@ make
 sudo make install
 make clean
 
-echo "Cloning Pynab ${pynab_branch} branch from ${pynab_repository}."
 cd ${home_dir}
-sudo -u ${owner} git clone --depth 1 -b ${pynab_branch} https://github.com/${pynab_repository}.git
+if [ -d "pynab" ]
+then
+    echo "Using existing local Pynab repository."
+else
+    echo "Cloning Pynab ${pynab_branch} branch from ${pynab_repository}."
+    sudo -u ${owner} git clone --depth 1 -b ${pynab_branch} https://github.com/${pynab_repository}.git
+fi
 
 echo "Installing NabBlockly."
 sudo apt-get install --no-install-recommends -y erlang-base erlang-dev erlang-inets erlang-tools erlang-xmerl
@@ -243,9 +257,6 @@ cd ${home_dir}/pynab
 sudo -u ${owner} /bin/bash install.sh ${install_env}
 
 echo "Cleaning up."
-# Cleanup any leftovers (from Kaldi install).
-sudo find / -xdev -name "._*" -exec rm {} \;
-sudo find / -xdev -user 501 -exec chown -h root:root {} \;
 # Cleanup caches.
 sudo rm -rf /root/.cache /root/.local /root/.wget-hsts
 sudo rm -rf ${home_dir}/.cache ${home_dir}/.local ${home_dir}/.wget-hsts
