@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -xuo pipefail
+set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 # makerfaire2018: Paris Maker Faire 2018 card, only fits Nabaztag V1.
@@ -72,13 +72,23 @@ if [ $makerfaire2018 -eq 1 ]; then
   fi
 fi
 
+build_and_install_driver() {
+  driver=${1}
+  for dir in /lib/modules/*/build
+  do
+    kernel=$(basename $(dirname ${dir}))
+    echo "Building ${driver} driver for kernel ${kernel}"
+    make KERNELRELEASE=${kernel} && sudo make install KERNELRELEASE=${kernel} && make clean KERNELRELEASE=${kernel}
+  done
+}
+
 if [ $upgrade -eq 1 -a $makerfaire2018 -eq 0 -a -d ${home_dir}/wm8960 ]; then
   echo "Updating sound driver - 2/15" > /tmp/pynab.upgrade
   cd ${home_dir}/wm8960
   sudo chown -R ${owner} .git
   pull=`git pull`
   if [ "$pull" != "Already up to date." ]; then
-    make && sudo make install && make clean
+    build_and_install_driver wm8960
     sudo touch /tmp/pynab.upgrade.reboot
   fi
 fi
@@ -90,14 +100,14 @@ if [ $upgrade -eq 1 ]; then
     sudo chown -R ${owner} .git
     pull=`git pull`
     if [ "$pull" != "Already up to date." ]; then
-      make && sudo make install && make clean
+      build_and_install_driver tagtagtag-ears
       sudo touch /tmp/pynab.upgrade.reboot
     fi
   else
     cd ${home_dir}
     git clone https://github.com/pguyot/tagtagtag-ears
     cd tagtagtag-ears
-    make && sudo make install && make clean
+    build_and_install_driver tagtagtag-ears
     sudo touch /tmp/pynab.upgrade.reboot
   fi
 else
@@ -114,14 +124,14 @@ if [ $upgrade -eq 1 ]; then
     sudo chown -R ${owner} .git
     pull=`git pull`
     if [ "$pull" != "Already up to date." ]; then
-      make && sudo make install && make clean
+      build_and_install_driver cr14
       sudo touch /tmp/pynab.upgrade.reboot
     fi
   else
     cd ${home_dir}
     git clone https://github.com/pguyot/cr14
     cd cr14
-    make && sudo make install && make clean
+    build_and_install_driver cr14
     sudo touch /tmp/pynab.upgrade.reboot
   fi
 else
@@ -180,48 +190,55 @@ if [ $makerfaire2018 -eq 0 ]; then
   fi
 
   # Maker Faire card has no mic, no need to install Kaldi
-  if [ ! -d "/opt/kaldi" ]; then
-    kaldi_release="e4940d045"
+  kaldi_release="e4940d045"
+  kaldi_dir="/opt/kaldi"; kaldi_pkgconfig="/usr/lib/pkgconfig/kaldi-asr.pc"
+  if [[ -f "${kaldi_pkgconfig}" && "$(grep -c ${kaldi_release} ${kaldi_pkgconfig})" -eq 0 ]]; then
+     # Installed Kaldi does not match needed version: remove it
+     sudo rm -rf "${kaldi_dir}"
+  fi
+  if [ ! -d "${kaldi_dir}" ]; then
     kaldi_platform=$(. /etc/os-release && echo "$ID$VERSION_ID-`uname -m`")
     if [ "${kaldi_platform}" = "debian11-armv7l" ]; then
       # (nasty) DietPi patch: debian11 version not available for armv7l
       kaldi_platform="raspbian11-armv7l"
     fi
-    echo "Installing precompiled ${kaldi_platform} Kaldi into /opt"
+    echo "Installing precompiled ${kaldi_platform} Kaldi into ${kaldi_dir}"
     kaldi_archive="${kaldi_release}/kaldi-${kaldi_release}-linux_${kaldi_platform}.tar.xz"
     wget -O - -q https://github.com/pguyot/kaldi/releases/download/${kaldi_archive} | sudo tar xJ -C /
     sudo ldconfig
   fi
 
-  sudo mkdir -p "/opt/kaldi/model"
+  sudo mkdir -p "${kaldi_dir}/model"
 
-  if [ ! -d "/opt/kaldi/model/kaldi-nabaztag-en-adapt-r20191222" ]; then
+  if [ ! -d "${kaldi_dir}/model/kaldi-nabaztag-en-adapt-r20191222" ]; then
     echo "Installing Kaldi model for English"
-    sudo tar xJf ${root_dir}/asr/kaldi-nabaztag-en-adapt-r20191222.tar.xz -C /opt/kaldi/model/
+    sudo tar xJf ${root_dir}/asr/kaldi-nabaztag-en-adapt-r20191222.tar.xz -C ${kaldi_dir}/model/
   fi
 
-  if [ ! -d "/opt/kaldi/model/kaldi-nabaztag-fr-adapt-r20200203" ]; then
+  if [ ! -d "${kaldi_dir}/model/kaldi-nabaztag-fr-adapt-r20200203" ]; then
     echo "Installing Kaldi model for French"
-    sudo tar xJf ${root_dir}/asr/kaldi-nabaztag-fr-adapt-r20200203.tar.xz -C /opt/kaldi/model/
+    sudo tar xJf ${root_dir}/asr/kaldi-nabaztag-fr-adapt-r20200203.tar.xz -C ${kaldi_dir}/model/
   fi
 fi
 
 cd ${root_dir}
 if [ -x "$(command -v python3.9)" ] ; then
-  python=python3.9
-  if [ ! -d "venv" ]; then
-    echo "Creating Python 3.9 virtual environment"
-    ${python} -m venv venv
-  fi
+  py_ver=3.9
 elif [ -x "$(command -v python3.7)" ] ; then
-  python=python3.7
-  if [ ! -d "venv" ]; then
-    echo "Creating Python 3.7 virtual environment"
-    ${python} -m venv venv
-  fi
+  py_ver=3.7
 else
   echo "Please install Python 3.7 or 3.9 (you might need to upgrade your Linux distribution)"
   exit 1
+fi
+python=python${py_ver}
+venv_cfg="venv/pyvenv.cfg"
+if [[ -f "${venv_cfg}" && "$(grep -c version\ =\ ${py_ver} ${venv_cfg})" -eq 0 ]]; then
+   # Installed virtual env does not match needed version: remove it
+   sudo rm -rf "venv"
+fi
+if [ ! -d "venv" ]; then
+  echo "Creating Python ${py_ver} virtual environment"
+  ${python} -m venv venv
 fi
 
 echo "Installing PyPi requirements"
@@ -303,6 +320,7 @@ if [ $upgrade -eq 0 ]; then
     }
   fi
 else
+  echo "Restarting Nginx"
   echo "Restarting Nginx - 10/15" > /tmp/pynab.upgrade
   if [ -e '/etc/nginx/sites-enabled/pynab' ]; then
     sudo mv /tmp/nginx-site.conf /etc/nginx/sites-enabled/pynab
@@ -318,6 +336,7 @@ psql -U pynab -c '' 2>/dev/null || {
   sudo -u postgres psql -U postgres -c "ALTER ROLE pynab CREATEDB"
 }
 
+echo "Updating data models"
 if [ $upgrade -eq 1 ]; then
   echo "Updating data models - 11/15" > /tmp/pynab.upgrade
 fi
@@ -325,6 +344,7 @@ venv/bin/python manage.py migrate
 
 all_locales="-l fr_FR -l de_DE -l en_US -l en_GB -l it_IT -l es_ES -l ja_jp -l pt_BR -l de -l en -l es -l fr -l it -l ja -l pt"
 
+echo "Updating localization messages"
 if [ $upgrade -eq 0 ]; then
   venv/bin/django-admin compilemessages ${all_locales}
 else
@@ -351,6 +371,7 @@ if [ $ci_chroot -eq 1 ]; then
 fi
 
 # copy service files
+echo "Installing service files"
 if [ $upgrade -eq 1 ]; then
   echo "Installing service files - 13/15" > /tmp/pynab.upgrade
 fi
@@ -421,12 +442,14 @@ END
 fi
 
 if [ -e /tmp/pynab.upgrade.reboot ]; then
+  echo "Rebooting..."
   echo "Upgrade requires reboot, rebooting now - 15/15" > /tmp/pynab.upgrade
   sudo rm -f /tmp/pynab.upgrade
   sudo rm -f /tmp/pynab.upgrade.reboot
   sudo reboot
 else
   if [ $ci_chroot -eq 0 ]; then
+    echo "Starting services"
     if [ $upgrade -eq 1 ]; then
       echo "Restarting services - 14/15" > /tmp/pynab.upgrade
     fi
