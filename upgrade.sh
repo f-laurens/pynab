@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -xuo pipefail
+set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 IFS=$'\n\t'
 
@@ -15,6 +15,7 @@ fi
 
 case $step in
   "init")
+    echo "Stopping services"
     echo "Stopping services" > /tmp/pynab.upgrade
     # stop services using service files.
     for service_file in */*.service ; do
@@ -26,6 +27,7 @@ case $step in
     sudo systemctl stop nabd.socket || echo -n ""
     sudo systemctl stop nabd.service || echo -n ""
   
+    echo "Updating Pynab"
     sudo -u ${owner} touch /tmp/pynab.upgrade
     sudo chown ${owner} /tmp/pynab.upgrade
     echo "Updating Pynab - 1/?" > /tmp/pynab.upgrade
