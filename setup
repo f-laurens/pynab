@@ -211,19 +211,19 @@ build_and_install_driver() {
 
 echo "Installing sound driver for Ulule 2019 cards."
 cd ${home_dir}
-sudo -u ${owner} git clone --depth 1 -b tagtagtag-sound https://github.com/pguyot/wm8960
+sudo -u ${owner} git clone --depth 1 -b tagtagtag-sound https://github.com/f-laurens/wm8960
 cd ${home_dir}/wm8960
 build_and_install_driver
 
 echo "Installing ears driver."
 cd ${home_dir}
-sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/tagtagtag-ears
+sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/f-laurens/tagtagtag-ears
 cd ${home_dir}/tagtagtag-ears
 build_and_install_driver
 
 echo "Installing RFID reader driver."
 cd ${home_dir}
-sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/cr14
+sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/f-laurens/cr14
 cd ${home_dir}/cr14
 build_and_install_driver
 

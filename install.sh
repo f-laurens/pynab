@@ -59,7 +59,7 @@ if [ $ci_chroot -eq 0 -a $makerfaire2018 -eq 0 -a `sudo aplay -L | grep -c "tagt
     echo "Please double-check and restart this script with --makerfaire2018"
   else
     echo "Please install and configure sound card driver:"
-    echo " https://github.com/pguyot/wm8960/tree/tagtagtag-sound"
+    echo " https://github.com/f-laurens/wm8960/tree/tagtagtag-sound"
   fi
   exit 1
 fi
@@ -105,14 +105,14 @@ if [ $upgrade -eq 1 ]; then
     fi
   else
     cd ${home_dir}
-    git clone https://github.com/pguyot/tagtagtag-ears
+    git clone https://github.com/f-laurens/tagtagtag-ears
     cd tagtagtag-ears
     build_and_install_driver tagtagtag-ears
     sudo touch /tmp/pynab.upgrade.reboot
   fi
 else
   if [ $ci_chroot -eq 0 -a ! -e "/dev/ear0" ]; then
-    echo "Please install ears driver https://github.com/pguyot/tagtagtag-ears"
+    echo "Please install ears driver https://github.com/f-laurens/tagtagtag-ears"
     exit 1
   fi
 fi
@@ -129,14 +129,14 @@ if [ $upgrade -eq 1 ]; then
     fi
   else
     cd ${home_dir}
-    git clone https://github.com/pguyot/cr14
+    git clone https://github.com/f-laurens/cr14
     cd cr14
     build_and_install_driver cr14
     sudo touch /tmp/pynab.upgrade.reboot
   fi
 else
   if [ $ci_chroot -eq 0 -a ! -e "/dev/rfid0" ]; then
-    echo "Please install cr14 RFID driver https://github.com/pguyot/cr14"
+    echo "Please install cr14 RFID driver https://github.com/f-laurens/cr14"
     exit 1
   fi
 fi
