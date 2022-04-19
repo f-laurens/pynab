@@ -51,7 +51,9 @@ fi
 cd `dirname "$0"`
 root_dir=`pwd`
 owner=`stat -c '%U' ${root_dir}`
-home_dir=$(dirname ${root_dir})
+uid=`stat -c '%u' ${root_dir}`
+gid=`stat -c '%g' ${root_dir}`
+inst_dir=$(dirname ${root_dir})
 
 if [ $ci_chroot -eq 0 -a $makerfaire2018 -eq 0 -a `sudo aplay -L | grep -c "tagtagtagsound"` -eq 0 ]; then
   if [ `sudo aplay -L | grep -c "hifiberry"` -gt 0 ]; then
@@ -82,10 +84,10 @@ build_and_install_driver() {
   done
 }
 
-if [ $upgrade -eq 1 -a $makerfaire2018 -eq 0 -a -d ${home_dir}/wm8960 ]; then
+if [ $upgrade -eq 1 -a $makerfaire2018 -eq 0 -a -d ${inst_dir}/wm8960 ]; then
   echo "Updating sound driver - 2/15" > /tmp/pynab.upgrade
-  cd ${home_dir}/wm8960
-  sudo chown -R ${owner} .git
+  cd ${inst_dir}/wm8960
+  sudo chown -R ${uid}:${gid} .
   pull=`git pull`
   if [ "$pull" != "Already up to date." ]; then
     build_and_install_driver wm8960
@@ -95,18 +97,19 @@ fi
 
 if [ $upgrade -eq 1 ]; then
   echo "Updating ears driver - 3/15" > /tmp/pynab.upgrade
-  if [ -d ${home_dir}/tagtagtag-ears ]; then
-    cd ${home_dir}/tagtagtag-ears
-    sudo chown -R ${owner} .git
+  if [ -d ${inst_dir}/tagtagtag-ears ]; then
+    cd ${inst_dir}/tagtagtag-ears
+    sudo chown -R ${uid}:${gid} .
     pull=`git pull`
     if [ "$pull" != "Already up to date." ]; then
       build_and_install_driver tagtagtag-ears
       sudo touch /tmp/pynab.upgrade.reboot
     fi
   else
-    cd ${home_dir}
-    git clone https://github.com/f-laurens/tagtagtag-ears
-    cd tagtagtag-ears
+    sudo mkdir -p ${inst_dir}/tagtagtag-ears
+    sudo chown ${uid}:${gid} ${inst_dir}/tagtagtag-ears
+    git clone https://github.com/f-laurens/tagtagtag-ears ${inst_dir}/tagtagtag-ears
+    cd ${inst_dir}/tagtagtag-ears
     build_and_install_driver tagtagtag-ears
     sudo touch /tmp/pynab.upgrade.reboot
   fi
@@ -119,18 +122,19 @@ fi
 
 if [ $upgrade -eq 1 ]; then
   echo "Updating RFID driver - 4/15" > /tmp/pynab.upgrade
-  if [ -d ${home_dir}/cr14 ]; then
-    cd ${home_dir}/cr14
-    sudo chown -R ${owner} .git
+  if [ -d ${inst_dir}/cr14 ]; then
+    cd ${inst_dir}/cr14
+    sudo chown -R ${uid}:${gid} .
     pull=`git pull`
     if [ "$pull" != "Already up to date." ]; then
       build_and_install_driver cr14
       sudo touch /tmp/pynab.upgrade.reboot
     fi
   else
-    cd ${home_dir}
-    git clone https://github.com/f-laurens/cr14
-    cd cr14
+    sudo mkdir -p ${inst_dir}/cr14
+    sudo chown ${uid}:${gid} ${inst_dir}/cr14
+    git clone https://github.com/f-laurens/cr14 ${inst_dir}/cr14
+    cd ${inst_dir}/cr14
     build_and_install_driver cr14
     sudo touch /tmp/pynab.upgrade.reboot
   fi
@@ -145,7 +149,7 @@ if [ $upgrade -eq 1 ]; then
   echo "Updating NabBlockly - 5/15" > /tmp/pynab.upgrade
   if [ -d ${root_dir}/nabblockly ]; then
     cd ${root_dir}/nabblockly
-    sudo chown -R ${owner} .
+    sudo chown -R ${uid}:${gid} .
     pull=`git pull`
     if [ "$pull" != "Already up to date." ]; then
       ./rebar3 release
@@ -161,29 +165,31 @@ fi
 
 if [ $upgrade -eq 1 ]; then
   echo "Updating Pynab CLI - 6/15" > /tmp/pynab.upgrade
-  if [ -d ${home_dir}/pynab_cli ]; then
-    cd ${home_dir}/pynab_cli
-    sudo chown -R ${owner} .
+  home_dir=$(getent passwd ${uid} | cut -d: -f6)
+  if [ -d ${inst_dir}/pynab_cli ]; then
+    cd ${inst_dir}/pynab_cli
+    sudo chown -R ${uid}:${gid} .
     pull=`git pull`
     if [ "$pull" != "Already up to date." ]; then
       sudo -u ${owner} mkdir -p ${home_dir}/bin
       cd ${home_dir}/bin
-      sudo -u ${owner} ln -fs ../pynab_cli/bin/* .
+      sudo -u ${owner} ln -fs ${inst_dir}/pynab_cli/bin/* .
     fi
   else
-    cd ${home_dir}
-    git clone -b release https://github.com/f-laurens/pynab_cli
+    sudo mkdir -p ${inst_dir}/pynab_cli
+    sudo chown ${uid}:${gid} ${inst_dir}/pynab_cli
+    git clone -b release https://github.com/f-laurens/pynab_cli ${inst_dir}/pynab_cli
     sudo -u ${owner} mkdir -p ${home_dir}/bin
     cd ${home_dir}/bin
-    sudo -u ${owner} ln -fs ../pynab_cli/bin/* .
+    sudo -u ${owner} ln -fs ${inst_dir}/pynab_cli/bin/* .
   fi
 else
-  if [ $ci_chroot -eq 0 -a ! -d "${home_dir}/pynab_cli" ]; then
+  if [ $ci_chroot -eq 0 -a ! -d "${inst_dir}/pynab_cli" ]; then
     echo "You may want to install Pynab CLI from https://github.com/f-laurens/pynab_cli"
   fi
 fi
 
-cd ${home_dir}
+cd ${inst_dir}
 if [ $makerfaire2018 -eq 0 ]; then
   if [ $upgrade -eq 1 ]; then
     echo "Updating ASR models - 7/15" > /tmp/pynab.upgrade
@@ -299,7 +305,7 @@ if [ $trust -ne 1 ]; then
   fi
 fi
 
-sudo sed -e "s|/home/pi/pynab|${root_dir}|g" < nabweb/nginx-site.conf > /tmp/nginx-site.conf
+sudo sed -e "s|/opt/pynab|${root_dir}|g" < nabweb/nginx-site.conf > /tmp/nginx-site.conf
 if [ $upgrade -eq 0 ]; then
   if [ ! -e '/etc/nginx/sites-enabled/pynab' ]; then
     echo "Installing Nginx configuration file"
@@ -377,12 +383,12 @@ if [ $upgrade -eq 1 ]; then
 fi
 for service_file in nabd/nabd.socket */*.service ; do
   name=`basename ${service_file}`
-  sudo sed -e "s|/home/pi/pynab|${root_dir}|g" < ${service_file} > /tmp/${name}
+  sudo sed -e "s|/opt/pynab|${root_dir}|g" -e "s|/home/pi/pynab|${root_dir}|g" < ${service_file} > /tmp/${name}
   sudo mv /tmp/${name} /lib/systemd/system/${name}
   sudo chown root /lib/systemd/system/${name}
   sudo systemctl enable ${name}
 done
-sudo sed -e "s|/home/pi/pynab|${root_dir}|g" < nabboot/nabboot.py > /tmp/nabboot.py
+sudo sed -e "s|/opt/pynab|${root_dir}|g" < nabboot/nabboot.py > /tmp/nabboot.py
 sudo mv /tmp/nabboot.py /lib/systemd/system-shutdown/nabboot.py
 sudo chown root /lib/systemd/system-shutdown/nabboot.py
 sudo chmod +x /lib/systemd/system-shutdown/nabboot.py
