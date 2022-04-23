@@ -1,7 +1,7 @@
 # Direct dependencies
 wheel
-Django==3.2.12; python_version == '3.7'
-Django==4.0.3; python_version == '3.9'
+Django==3.2.13; python_version == '3.7'
+Django==4.0.4; python_version == '3.9'
 gunicorn==20.1.0
 lockfile==0.12.2
 Mastodon.py==1.5.1
@@ -14,7 +14,7 @@ pytest-django==3.8.0
 pytest-pep8==1.0.6
 asynctest==0.13.0
 coverage==6.3.2
-black==22.1.0
+black==22.3.0
 flake8==4.0.1
 isort==5.10.1
 pre_commit==2.17.0
@@ -54,7 +54,7 @@ toml==0.10.2
 appdirs==1.4.4
 regex==2022.3.2
 typed_ast==1.5.2
-click==8.0.4
+click==8.1.2
 pytz==2021.3
 asgiref==3.5.0
 sqlparse==0.4.2
