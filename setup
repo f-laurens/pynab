@@ -117,10 +117,34 @@ cat /boot/config.txt | grep "dtoverlay=hifiberry-dac"
 
 if [ "${install_env}" == "ci-chroot" ]
 then
+    # Install comitup package for headless WiFi setup
+    wget https://davesteele.github.io/comitup/deb/davesteele-comitup-apt-source_1.1_all.deb
+    dpkg -i --force-all davesteele-comitup-apt-source_1.1_all.deb
+    rm davesteele-comitup-apt-source_1.1_all.deb
+    apt-get update -y
+    apt-get install --no-install-recommends -y comitup comitup-watch
+    rm /etc/network/interfaces
+    systemctl mask dnsmasq.service
+    systemctl mask systemd-resolved.service
+    systemctl mask dhcpd.service
+    systemctl mask dhcpcd.service
+    systemctl mask wpa-supplicant.service
+    echo "web_service: nginx.service" >> /etc/comitup.conf
+    echo "ap_name: Nabaztag-<nnn>" >> /etc/comitup.conf
+    echo "service_name: Nabaztag" >> /etc/comitup.conf
+
     if [ "${distro}" == "raspios"  ]
     then
-        # assume user will do any needed SD card configuration.
-        :
+        if [ ! -f "/boot/userconf.txt" ]
+        then
+            # make sure 'pi' user has default 'raspberry' password
+            echo 'pi:$y$j9T$9ZU7FXeU7PVHm49rB5Hbe.$MHZMLJfNfXBFbYgGwg/TNjADIRbna.Epxzd/MrqPJM9' > /boot/userconf.txt
+        fi
+        if [ ! -f "/boot/ssh" ]
+        then
+            # enable SSH
+            touch /boot/ssh
+        fi
     elif [ "${distro}" == "dietpi" ]
     then
         echo "Setting DietPi 'first boot' parameters."
@@ -135,6 +159,7 @@ then
         # -4=Daemon + Drift rather than 2=boot + daily (DietPi default):
         sed -i "s/\(CONFIG_NTP_MODE\)=.*/\1=4/" /boot/dietpi.txt
         sed -i "s/\(CONFIG_SERIAL_CONSOLE_ENABLE\)=.*/\1=0/" /boot/dietpi.txt
+        rm /boot/dietpi-wifi.txt
     fi
 
     echo "Setting hostname."
