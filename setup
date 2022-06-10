@@ -201,21 +201,21 @@ build_and_install_driver() {
 echo "Installing sound driver for Ulule 2019 cards."
 sudo mkdir -p ${inst_dir}/wm8960
 sudo chown ${owner}:${group} ${inst_dir}/wm8960
-sudo -u ${owner} git clone --depth 1 -b tagtagtag-sound https://github.com/f-laurens/wm8960 ${inst_dir}/wm8960
+sudo -u ${owner} git clone --depth 1 -b tagtagtag-sound https://github.com/pguyot/wm8960 ${inst_dir}/wm8960
 cd ${inst_dir}/wm8960
 build_and_install_driver
 
 echo "Installing ears driver."
 sudo mkdir -p ${inst_dir}/tagtagtag-ears
 sudo chown ${owner}:${group} ${inst_dir}/tagtagtag-ears
-sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/f-laurens/tagtagtag-ears ${inst_dir}/tagtagtag-ears
+sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/tagtagtag-ears ${inst_dir}/tagtagtag-ears
 cd ${inst_dir}/tagtagtag-ears
 build_and_install_driver
 
 echo "Installing RFID reader driver."
 sudo mkdir -p ${inst_dir}/cr14
 sudo chown ${owner}:${group} ${inst_dir}/cr14
-sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/f-laurens/cr14 ${inst_dir}/cr14
+sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/cr14 ${inst_dir}/cr14
 cd ${inst_dir}/cr14
 build_and_install_driver
 
