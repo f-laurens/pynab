@@ -121,7 +121,7 @@ else
 fi
 
 if [ $upgrade -eq 1 ]; then
-  echo "Updating RFID driver - 4/15" > /tmp/pynab.upgrade
+  echo "Updating RFID drivers - 4/15" > /tmp/pynab.upgrade
   if [ -d ${inst_dir}/cr14 ]; then
     cd ${inst_dir}/cr14
     sudo chown -R ${uid}:${gid} .
@@ -138,10 +138,30 @@ if [ $upgrade -eq 1 ]; then
     build_and_install_driver cr14
     sudo touch /tmp/pynab.upgrade.reboot
   fi
+  if [ -d ${inst_dir}/st25r391x ]; then
+    cd ${inst_dir}/st25r391x
+    sudo chown -R ${uid}:${gid} .
+    pull=`git pull`
+    if [ "$pull" != "Already up to date." ]; then
+      build_and_install_driver st25r391x
+      sudo touch /tmp/pynab.upgrade.reboot
+    fi
+  else
+    sudo mkdir -p ${inst_dir}/st25r391x
+    sudo chown ${uid}:${gid} ${inst_dir}/st25r391x
+    git clone https://github.com/pguyot/st25r391x ${inst_dir}/st25r391x
+    cd ${inst_dir}/st25r391x
+    build_and_install_driver st25r391x
+    # Disable this driver as it conflicts with cr14 (nabboot will do the switch)
+    sudo sed /boot/config.txt -i -e "s/^dtoverlay=st25r391x/#dtoverlay=st25r391x/"
+    # Enable i2c-dev
+    grep -q -E "^i2c-dev" /etc/modules || printf "i2c-dev\n" | sudo tee -a /etc/modules
+    sudo touch /tmp/pynab.upgrade.reboot
+  fi
 else
-  if [ $ci_chroot -eq 0 -a ! -e "/dev/rfid0" ]; then
-    echo "Please install cr14 RFID driver https://github.com/pguyot/cr14"
-    exit 1
+  if [ $ci_chroot -eq 0 -a ! -e "/dev/rfid0" -a ! -e "/dev/nfc0" ]; then
+    echo "If you have a TAGTAG with the original RFID card, you may want to install cr14 RFID driver https://github.com/pguyot/cr14"
+    echo "If you have a 2022 NFC card, you need to install st25r391x RFID driver https://github.com/pguyot/st25r391x"
   fi
 fi
 
@@ -208,10 +228,25 @@ if [ $makerfaire2018 -eq 0 ]; then
       # (nasty) DietPi patch: debian11 version not available for armv7l
       kaldi_platform="raspbian11-armv7l"
     fi
+    # When running in 32 bits mode, maintain Pi Zero compatibility
+    if [ "${kaldi_platform}" = "raspbian10-armv7l" ]; then
+      kaldi_platform="raspbian10-armv6l"
+    fi
+    if [ "${kaldi_platform}" = "raspbian11-armv7l" ]; then
+      kaldi_platform="raspbian11-armv6l"
+    fi
     echo "Installing precompiled ${kaldi_platform} Kaldi into ${kaldi_dir}"
     kaldi_archive="${kaldi_release}/kaldi-${kaldi_release}-linux_${kaldi_platform}.tar.xz"
     wget -O - -q https://github.com/pguyot/kaldi/releases/download/${kaldi_archive} | sudo tar xJ -C /
     sudo ldconfig
+
+    # Fix upgrade of py-kaldi-asr
+    pushd ${root_dir}
+    if [[ -f venv/lib/python3.7/site-packages/kaldiasr/nnet3.cpython-37m-arm-linux-gnueabihf.so && "$(grep -c ZN3fst8internal14DenseSymbolMapD1Ev venv/lib/python3.7/site-packages/kaldiasr/nnet3.cpython-37m-arm-linux-gnueabihf.so)" -ne 0 ]]; then
+        echo "Removing incompatible py-kaldi-asr package"
+        venv/bin/pip uninstall -y py-kaldi-asr
+    fi
+    popd
   fi
 
   sudo mkdir -p "${kaldi_dir}/model"
