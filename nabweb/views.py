@@ -185,6 +185,26 @@ class NabWebRfidView(BaseView):
         return context
 
 
+async def check_is_idle_state(reader):
+    line = await asyncio.wait_for(reader.readline(), 1.0)
+    packet = json.loads(line.decode("utf8"))
+    if (
+        "type" not in packet
+        or packet["type"] != "state"
+        or "state" not in packet
+    ):
+        return False, {
+            "status": "error",
+            "message": "Expected state packet",
+        }
+    if packet["state"] != "idle":
+        return False, {
+            "status": "error",
+            "message": f"Nabaztag is busy ({packet['state']})",
+        }
+    return True, None
+
+
 class NabWebRfidReadView(View):
     READ_TIMEOUT = 30.0
 
@@ -192,6 +212,9 @@ class NabWebRfidReadView(View):
         return await NabdConnection.transaction(self._do_read_tag, timeout)
 
     async def _do_read_tag(self, reader, writer, timeout):
+        is_idle, error_msg = await check_is_idle_state(reader)
+        if not is_idle:
+            return error_msg
         # Enter interactive mode to get every rfid event (instead of apps)
         packet = (
             '{"type":"mode","mode":"interactive","events":["rfid/*"],'
@@ -249,16 +272,20 @@ class NabWebRfidReadView(View):
 class NabWebRfidWriteView(View):
     WRITE_TIMEOUT = 30.0
 
-    async def write_tag(self, uid, picture, app, data, timeout):
+    async def write_tag(self, tech, uid, picture, app, data, timeout):
         return await NabdConnection.transaction(
-            self._do_write_tag, uid, picture, app, data, timeout
+            self._do_write_tag, tech, uid, picture, app, data, timeout
         )
 
     async def _do_write_tag(
-        self, reader, writer, uid, picture, app, data, timeout
+        self, reader, writer, tech, uid, picture, app, data, timeout
     ):
+        is_idle, error_msg = await check_is_idle_state(reader)
+        if not is_idle:
+            return error_msg
         packet = {
             "type": "rfid_write",
+            "tech": tech,
             "uid": uid,
             "picture": int(picture),
             "app": app,
@@ -282,6 +309,7 @@ class NabWebRfidWriteView(View):
                     response = {
                         "status": packet["status"],
                         "rfid": {
+                            "tech": tech,
                             "uid": uid,
                             "picture": picture,
                             "app": app,
@@ -299,7 +327,8 @@ class NabWebRfidWriteView(View):
 
     def post(self, request, *args, **kwargs):
         if (
-            "uid" not in request.POST
+            "tech" not in request.POST
+            or "uid" not in request.POST
             or "picture" not in request.POST
             or "app" not in request.POST
         ):
@@ -307,6 +336,7 @@ class NabWebRfidWriteView(View):
                 {"status": "error", "message": "Missing arguments."},
                 status=400,
             )
+        tech = request.POST["tech"]
         uid = request.POST["uid"]
         picture = request.POST["picture"]
         app = request.POST["app"]
@@ -316,7 +346,7 @@ class NabWebRfidWriteView(View):
             data = ""
         write_result = asyncio.run(
             self.write_tag(
-                uid, picture, app, data, NabWebRfidReadView.READ_TIMEOUT
+                tech, uid, picture, app, data, NabWebRfidReadView.READ_TIMEOUT
             )
         )
         return JsonResponse(write_result)
@@ -433,6 +463,7 @@ class GitInfo:
         "sound_driver": "../wm8960",
         "ears_driver": "../tagtagtag-ears/",
         "rfid_driver": "../cr14/",
+        "nfc_driver": "../st25r391x/",
         "nabblockly": "nabblockly",
         "pynab_cli": "../pynab_cli/",
     }
@@ -441,6 +472,7 @@ class GitInfo:
         "sound_driver": "Tagtagtag sound card driver",
         "ears_driver": "Ears driver",
         "rfid_driver": "RFID reader driver",
+        "nfc_driver": "NFC card driver",
         "nabblockly": "NabBlockly",
         "pynab_cli": "Pynab CLI",
     }

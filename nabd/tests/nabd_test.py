@@ -14,7 +14,7 @@ from utils import close_old_async_connections
 
 import nabtaichid
 from nabd import nabd
-from nabd.rfid import TagFlags
+from nabd.rfid import TagFlags, TagTechnology
 
 # import unittest.mock
 
@@ -581,6 +581,66 @@ class TestNabd(TestNabdBase):
         finally:
             s1.close()
 
+    def test_interactive_close_socket(self):
+        s1 = self.service_socket()
+        s2 = self.service_socket()
+        try:
+            packet = s1.readline()  # state packet
+            packet = s2.readline()  # state packet
+            s1.write(b'{"type":"mode","mode":"interactive"}\r\n')
+            packet = s1.readline()  # response packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "response")
+            self.assertEqual(packet_j["status"], "ok")
+            packet = s1.readline()  # new state packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "state")
+            self.assertEqual(packet_j["state"], "interactive")
+            packet = s2.readline()  # new state packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "state")
+            self.assertEqual(packet_j["state"], "interactive")
+            s1.close()
+            packet = s2.readline()  # new state packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "state")
+            self.assertEqual(packet_j["state"], "idle")
+        finally:
+            s1.close()
+            s2.close()
+
+    def test_interactive_idle(self):
+        s1 = self.service_socket()
+        s2 = self.service_socket()
+        try:
+            packet = s1.readline()  # state packet
+            packet = s2.readline()  # state packet
+            s1.write(b'{"type":"mode","mode":"interactive"}\r\n')
+            packet = s1.readline()  # response packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "response")
+            self.assertEqual(packet_j["status"], "ok")
+            packet = s1.readline()  # new state packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "state")
+            self.assertEqual(packet_j["state"], "interactive")
+            packet = s2.readline()  # new state packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "state")
+            self.assertEqual(packet_j["state"], "interactive")
+            s1.write(b'{"type":"mode","mode":"idle"}\r\n')
+            packet = s1.readline()  # new state packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "state")
+            self.assertEqual(packet_j["state"], "idle")
+            packet = s2.readline()  # new state packet
+            packet_j = json.loads(packet.decode("utf8"))
+            self.assertEqual(packet_j["type"], "state")
+            self.assertEqual(packet_j["state"], "idle")
+        finally:
+            s1.close()
+            s2.close()
+
 
 @pytest.mark.django_db(transaction=True)
 class TestRfid(TestNabdBase):
@@ -615,11 +675,13 @@ class TestRfid(TestNabdBase):
             self.assertEqual(mode_packet_j["request_id"], "mode_id")
             rfid = self.nabd.nabio.rfid
             rfid.send_detect_event(
+                TagTechnology.ST25TB,
                 b"\xd0\x02\x18\x01\x02\x03\x04\x05",
                 None,
                 None,
                 None,
                 TagFlags.CLEAR,
+                None,
             )
             packet = s1.readline()  # response packet
             packet_j = json.loads(packet.decode("utf8"))
@@ -645,11 +707,13 @@ class TestRfid(TestNabdBase):
             self.assertEqual(packet_j["request_id"], "mode_id")
             rfid = self.nabd.nabio.rfid
             rfid.send_detect_event(
+                TagTechnology.ST25TB,
                 b"\xd0\x02\x18\x01\x02\x03\x04\x05",
                 42,
                 nabtaichid.NABAZTAG_RFID_APPLICATION_ID,
                 b"",
                 TagFlags.FORMATTED,
+                None,
             )
             packet = s1.readline()  # response packet
             packet_j = json.loads(packet.decode("utf8"))
@@ -667,6 +731,7 @@ class TestRfid(TestNabdBase):
             packet = s1.readline()  # state packet
             packet = (
                 '{"type":"rfid_write",'
+                '"tech":"st25tb",'
                 '"uid":"d0:02:18:01:02:03:04:05",'
                 '"picture":42,'
                 '"app":"nabtaichid",'
@@ -683,7 +748,7 @@ class TestRfid(TestNabdBase):
             self.assertEqual(rfid.called_list[0], "on_detect()")
             self.assertEqual(
                 rfid.called_list[1],
-                f"write(b'\\xd0\\x02\\x18\\x01\\x02\\x03\\x04\\x05',"
+                f"write(17,b'\\xd0\\x02\\x18\\x01\\x02\\x03\\x04\\x05',"
                 f"42,{nabtaichid.NABAZTAG_RFID_APPLICATION_ID},b'')",
             )
         finally:

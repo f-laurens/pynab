@@ -18,6 +18,8 @@ class NabIO(object, metaclass=abc.ABCMeta):
     MODEL_2019_TAG = 2
     # with RFID
     MODEL_2019_TAGTAG = 3
+    # with NFC card
+    MODEL_2022_NFC = 4
 
     # Each info loop lasts 15 seconds
     INFO_LOOP_LENGTH = 15.0
@@ -142,7 +144,8 @@ class NabIO(object, metaclass=abc.ABCMeta):
         Make sure the callback is called on the provided event loop, with
         loop.call_soon_threadsafe
         """
-        self.rfid.on_detect(loop, callback)
+        if self.rfid is not None:
+            self.rfid.on_detect(loop, callback)
 
     async def play_info(self, condvar, tempo, colors):
         """

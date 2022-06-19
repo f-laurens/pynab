@@ -1,0 +1,58 @@
+name: 🛠  Test upgrade
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - 'fl[0-9]+.[0-9]+.[0-9]+*'
+      - 'fx[0-9]+.[0-9]+.[0-9]+*'
+    branches:
+      - 'releng'
+
+jobs:
+  test_upgrade:
+    name: Test upgrade script
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [pynab_093_zero, pynab_093_zero2]
+        include:
+        - target: pynab_093_zero
+          cpu: arm1176
+          cpu_info: cpuinfo/raspberrypi_zero_w
+          base_image: https://github.com/f-laurens/pynab/releases/download/v0.9.1%2Bfl0.9.3/pynab-v0.9.1+fl0.9.3-zero_raspios.img.xz
+          install_dir: /home/pi/pynab
+        - target: pynab_093_zero2
+          cpu: cortex-a7
+          cpu_info: cpuinfo/raspberrypi_zero2_w
+          base_image: https://github.com/f-laurens/pynab/releases/download/v0.9.1%2Bfl0.9.3/pynab-v0.9.1+fl0.9.3-zero_raspios.img.xz
+          install_dir: /home/pi/pynab
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run test script in chroot environment
+        uses: f-laurens/arm-runner-action@v2
+        id: arm_runner_tests
+        with:
+          image_additional_mb: 4096
+          base_image: ${{ matrix.base_image }}
+          cpu: ${{ matrix.cpu }}
+          cpu_info: ${{ matrix.cpu_info }}
+          bind_mount_repository: yes
+          optimize_image: no
+          import_github_env: yes
+          commands: |
+            cd ${{ matrix.install_dir }}
+            sudo -u pi git remote set-branches --add origin ${GITHUB_REF##*/}
+            sudo -u pi git fetch -v
+            sudo -u pi git branch release -u origin/${GITHUB_REF##*/}
+            which aplay
+            echo $PATH
+            (echo "#!/bin/sh" && echo "echo tagtagtagsound") > /bin/aplay
+            chmod +x /bin/aplay
+            aplay -L
+            cluster_version=`echo /etc/postgresql/*/main/pg_hba.conf  | sed -E 's|/etc/postgresql/(.+)/(.+)/pg_hba.conf|\1|g'`
+            cluster_name=`echo /etc/postgresql/*/main/pg_hba.conf  | sed -E 's|/etc/postgresql/(.+)/(.+)/pg_hba.conf|\2|g'`
+            sudo -u postgres taskset -c 0 /usr/lib/postgresql/${cluster_version}/bin/pg_ctl start -D /etc/postgresql/${cluster_version}/${cluster_name}/
+            sudo -u pi /bin/bash upgrade.sh
+            sudo mkdir -p /run/systemd/timesync/ && sudo touch /run/systemd/timesync/synchronized
+            CI=1 venv/bin/pytest
