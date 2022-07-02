@@ -42,14 +42,14 @@ jobs:
           import_github_env: yes
           commands: |
             cd ${{ matrix.install_dir }}
-            sudo -u pi git remote set-branches --add origin ${GITHUB_REF##*/}
+            if [ x"${GITHUB_REPOSITORY}" != x"nabaztag2018/pynab" ]; then
+                sudo -u pi git remote set-url origin https://github.com/${GITHUB_REPOSITORY}
+            fi
+            sudo -u pi git remote set-branches --add origin ${GITHUB_REF_NAME}
             sudo -u pi git fetch -v
-            sudo -u pi git branch release -u origin/${GITHUB_REF##*/}
-            which aplay
-            echo $PATH
-            (echo "#!/bin/sh" && echo "echo tagtagtagsound") > /bin/aplay
-            chmod +x /bin/aplay
-            aplay -L
+            sudo -u pi git branch release -u origin/${GITHUB_REF_NAME}
+            (echo "#!/bin/sh" && echo "echo tagtagtagsound") > /usr/bin/aplay
+            chmod +x /usr/bin/aplay
             cluster_version=`echo /etc/postgresql/*/main/pg_hba.conf  | sed -E 's|/etc/postgresql/(.+)/(.+)/pg_hba.conf|\1|g'`
             cluster_name=`echo /etc/postgresql/*/main/pg_hba.conf  | sed -E 's|/etc/postgresql/(.+)/(.+)/pg_hba.conf|\2|g'`
             sudo -u postgres taskset -c 0 /usr/lib/postgresql/${cluster_version}/bin/pg_ctl start -D /etc/postgresql/${cluster_version}/${cluster_name}/
