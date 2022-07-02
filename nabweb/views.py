@@ -573,18 +573,10 @@ class GitInfo:
             .strip()
             != ""
         )
-        info["tag"] = (
-            os.popen(
-                f"git -C {repo_dir} describe --long 2>/dev/null || "
-                f"git -C {repo_dir} describe --long --tags 2>/dev/null"
-            )
-            .read()
-            .strip()
-        )
         commits_count = (
             os.popen(
                 f"sudo -u \\#{repo_owner} "
-                f"git -C {repo_dir} fetch --no-tags >/dev/null && "
+                f"git -C {repo_dir} fetch >/dev/null && "
                 f"git -C {repo_dir} rev-list --count HEAD..{upstream_branch}"
             )
             .read()
@@ -607,6 +599,14 @@ class GitInfo:
             info["status"] = "ok"
             info["commits_count"] = int(commits_count)
             info["local_commits_count"] = int(local_commits_count)
+        info["tag"] = (
+            os.popen(
+                f"git -C {repo_dir} describe --long 2>/dev/null || "
+                f"git -C {repo_dir} describe --long --tags 2>/dev/null"
+            )
+            .read()
+            .strip()
+        )
         info["info_date"] = datetime.datetime.now()
         info["name"] = GitInfo.NAMES[repository]
         return info
