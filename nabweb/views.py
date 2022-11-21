@@ -576,7 +576,7 @@ class GitInfo:
         commits_count = (
             os.popen(
                 f"sudo -u \\#{repo_owner} "
-                f"git -C {repo_dir} fetch >/dev/null && "
+                f"git -C {repo_dir} fetch -t -f >/dev/null && "
                 f"git -C {repo_dir} rev-list --count HEAD..{upstream_branch}"
             )
             .read()
