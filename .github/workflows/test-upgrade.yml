@@ -28,7 +28,7 @@ jobs:
           base_image: https://github.com/f-laurens/pynab/releases/download/v0.9.1%2Bfl0.9.3/pynab-v0.9.1+fl0.9.3-zero_raspios.img.xz
           install_dir: /home/pi/pynab
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run test script in chroot environment
         uses: f-laurens/arm-runner-action@v2
         id: arm_runner_tests
