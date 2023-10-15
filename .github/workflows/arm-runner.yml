@@ -25,7 +25,7 @@ jobs:
         - target: zero_raspios
           cpu: arm1176
           cpu_info: cpuinfo/raspberrypi_zero_w
-          base_image: raspios_lite:latest
+          base_image: raspios_lite:2023-05-03
         - target: zero_dietpi
           cpu: arm1176
           cpu_info: cpuinfo/raspberrypi_zero_w
@@ -75,7 +75,7 @@ jobs:
         - target: zero_raspios
           cpu: arm1176
           cpu_info: cpuinfo/raspberrypi_zero_w
-          base_image: raspios_lite:latest
+          base_image: raspios_lite:2023-05-03
         - target: zero_dietpi
           cpu: arm1176
           cpu_info: cpuinfo/raspberrypi_zero_w
