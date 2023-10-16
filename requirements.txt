@@ -1,7 +1,7 @@
 # Direct dependencies
 wheel
 Django==3.2.22; python_version == '3.7'
-Django==4.0.10; python_version == '3.9'
+Django==4.2.6; python_version == '3.9'
 django-stubs==1.11.0
 django-stubs-ext==0.4.0
 mypy==0.950
@@ -64,7 +64,7 @@ regex==2022.3.2
 typed_ast==1.5.2
 click==8.1.2
 pytz==2021.3
-asgiref==3.5.0
+asgiref==3.6.0
 sqlparse==0.4.4
 # Latest importlib_metadata compatible with latest flake8
 importlib_metadata==4.2.0
