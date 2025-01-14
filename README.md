@@ -4,9 +4,8 @@
 [![build (qemu)](https://github.com/f-laurens/pynab/actions/workflows/arm-runner.yml/badge.svg?branch=fl)](https://github.com/f-laurens/pynab/actions/workflows/arm-runner.yml)
 [![tests](https://github.com/f-laurens/pynab/actions/workflows/tests.yml/badge.svg?branch=fl)](https://github.com/f-laurens/pynab/actions/workflows/tests.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/f-laurens/pynab.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/f-laurens/pynab/alerts/)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/f-laurens/pynab.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/f-laurens/pynab/context:python)
-[![codecov](https://codecov.io/gh/f-laurens/pynab/branch/fl/graph/badge.svg)](https://codecov.io/gh/f-laurens/pynab)
+[![codecov](https://codecov.io/gh/f-laurens/pynab/branch/master/graph/badge.svg)](https://codecov.io/gh/f-laurens/pynab)
+[![Twitter](https://img.shields.io/twitter/follow/nabaztagtagtag?label=Follow&style=social)](https://twitter.com/nabaztagtagtag)
 
 ## Cartes
 
@@ -15,8 +14,6 @@ Ce système est conçu pour deux cartes pour **Nabaztag** (v1) et **Nabaztag:Tag
 - Une nouvelle version de la carte, proposée via les campagnes Ulule de [mai 2019](https://fr.ulule.com/le-retour-du-nabaztag/) et [octobre 2021](https://fr.ulule.com/l-eternel-retour-du-nabaztag/), qui fonctionne avec les Nabaztag et les Nabaztag:Tag (les micros sont sur la carte, ce qui permet aux Nabaztag de bénéficier aussi de la reconnaissance vocale).
 
 Les schémas et fichiers de fabrication de ces deux cartes sont dans le repository [hardware](https://github.com/nabaztag2018/hardware), respectivement [`RPI_Nabaztag`](https://github.com/nabaztag2018/hardware/blob/master/RPI_Nabaztag.PDF) (2018) et [`tagtagtag_V2.0`](https://github.com/nabaztag2018/hardware/tree/master/tagtagtag_V2.0) (2019).
-
-Pour être prévenu de la prochaine campagne, vous pouvez vous inscrire à la [liste de diffusion](https://tinyletter.com/nabaztag).
 
 ## Images
 

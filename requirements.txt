@@ -1,11 +1,11 @@
 # Direct dependencies
 wheel
-Django==3.2.23; python_version == '3.7'
-Django==4.2.7; python_version == '3.9'
+Django==3.2.25; python_version == '3.7'
+Django==4.2.17; python_version == '3.9'
 django-stubs==1.11.0
 django-stubs-ext==0.4.0
 mypy==0.950
-gunicorn==20.1.0
+gunicorn==22.0.0
 lockfile==0.12.2
 Mastodon.py==1.5.1
 meteofrance-api==1.0.2
@@ -41,14 +41,14 @@ https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_p
 https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_parsers-0.4.3-cp37-cp37m-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version == '3.7'
 https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_parsers-0.4.3-cp39-cp39-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version == '3.9'
 https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_parsers-0.4.3-cp39-cp39-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version == '3.9'
-snips-nlu-parsers==0.4.3; sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine) or (python_version != '3.7' and python_version != '3.9')
+git+https://github.com/pguyot/snips-nlu-parsers@0.4.3-2024#subdirectory=python; sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9')
 
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp37-cp37m-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.7'
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp39-cp39-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.9'
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp37-cp37m-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version == '3.7'
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp39-cp39-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version == '3.9'
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp39-cp39-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version == '3.9'
-snips-nlu-utils==0.9.1;  sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9')
+snips-nlu-utils==0.9.1; sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9')
 
 https://github.com/pguyot/pynfcdev/releases/download/v0.7.4/pynfcdev-0.7.4-py3-none-any.whl
 ndef==0.2
@@ -65,7 +65,8 @@ typed_ast==1.5.2
 click==8.1.2
 pytz==2021.3
 asgiref==3.6.0
-sqlparse==0.4.4
+sqlparse==0.4.4; python_version == '3.7'
+sqlparse==0.5.0; python_version != '3.7'
 # Latest importlib_metadata compatible with latest flake8
 importlib_metadata==4.2.0
 mccabe==0.6.1
@@ -106,7 +107,7 @@ certifi==2023.7.22
 urllib3==1.26.18
 types_urllib3==1.26.15
 charset_normalizer==2.0.12
-idna==3.3
+idna==3.7
 execnet==1.9.0
 pyparsing==3.0.7
 platformdirs==2.5.1
@@ -116,7 +117,7 @@ docopt==0.6.2
 joblib==1.2.0
 python_crfsuite==0.9.7
 tabulate==0.8.9
-tqdm==4.63.0
+tqdm==4.66.3
 requests==2.31.0
 types_requests==2.27.30
 iniconfig==1.1.1
