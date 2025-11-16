@@ -220,6 +220,10 @@ class NabWeatherd(NabInfoService):
             "foggy",
             FOGGY_INFO_ANIMATION,
         ),
+        "Brouillard dense": (
+            "foggy",
+            FOGGY_INFO_ANIMATION,
+        ),
         "Brouillard givrant": (
             "foggy",
             FOGGY_INFO_ANIMATION,
