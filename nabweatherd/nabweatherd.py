@@ -192,6 +192,14 @@ class NabWeatherd(NabInfoService):
             "snowy",
             SNOWY_INFO_ANIMATION,
         ),
+        "Averses de neige faible": (
+            "snowy",
+            SNOWY_INFO_ANIMATION,
+        ),
+        "Neige faible": (
+            "snowy",
+            SNOWY_INFO_ANIMATION,
+        ),
         "Neige forte": (
             "snowy",
             SNOWY_INFO_ANIMATION,
@@ -217,6 +225,10 @@ class NabWeatherd(NabInfoService):
             FOGGY_INFO_ANIMATION,
         ),
         "Brouillard": (
+            "foggy",
+            FOGGY_INFO_ANIMATION,
+        ),
+        "Brouillard dense": (
             "foggy",
             FOGGY_INFO_ANIMATION,
         ),
