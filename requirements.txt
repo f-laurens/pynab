@@ -113,7 +113,7 @@ urllib3==1.26.20 ; python_version == '3.7'
 urllib3==2.6.3 ; python_version != '3.7'
 types_urllib3==1.26.15
 charset_normalizer==2.0.12
-idna==3.7
+idna==3.15
 execnet==1.9.0
 pyparsing==3.0.7
 platformdirs==2.5.1; python_version == '3.7'
