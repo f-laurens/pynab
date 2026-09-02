@@ -12,7 +12,7 @@ meteofrance-api==1.4.0; python_version != '3.7'
 meteofrance-api==1.2.0; python_version == '3.7'
 mpg123==0.4
 psycopg2-binary==2.9.3
-pytest==7.0.1
+pytest==7.4.4
 #pytest-django==4.5.2
 pytest-django==3.8.0
 pytest-pep8==1.0.6
@@ -113,13 +113,15 @@ urllib3==1.26.20 ; python_version == '3.7'
 urllib3==2.6.3 ; python_version != '3.7'
 types_urllib3==1.26.15
 charset_normalizer==2.0.12
-idna==3.7
+idna==3.10 ; python_version == '3.7'
+idna==3.15 ; python_version != '3.7'
 execnet==1.9.0
 pyparsing==3.0.7
 platformdirs==2.5.1; python_version == '3.7'
 platformdirs==3.9.1; python_version != '3.7'
 distlib==0.3.9
-filelock==3.19.1
+filelock==3.12.2 ; python_version == '3.7'
+filelock==3.19.1 ; python_version != '3.7'
 docopt==0.6.2
 joblib==1.2.0
 python_crfsuite==0.9.7
