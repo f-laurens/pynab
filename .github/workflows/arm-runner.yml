@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run test suite in chroot environment
-        uses: pguyot/arm-runner-action@v2.6.5
+        uses: pguyot/arm-runner-action@45f370abd7eed1b20397277e5ec0cb0a31adb026  # main 2026-09-26 (Ubuntu 26.04 runner support; no release tag yet)
         id: arm_runner_tests
         with:
           image_additional_mb: 4096
@@ -94,7 +94,7 @@ jobs:
           fi
 
       - name: Create a release image in chroot environment
-        uses: pguyot/arm-runner-action@v2.6.5
+        uses: pguyot/arm-runner-action@45f370abd7eed1b20397277e5ec0cb0a31adb026  # main 2026-09-26 (Ubuntu 26.04 runner support; no release tag yet)
         id: arm_runner_install
         with:
           image_additional_mb: 4096
