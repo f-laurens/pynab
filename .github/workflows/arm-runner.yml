@@ -7,6 +7,7 @@ on:
       - 'fx[0-9]+.[0-9]+.[0-9]+*'
     branches:
       - 'releng'
+      - 'bookworm'
   workflow_dispatch:
 
 jobs:
