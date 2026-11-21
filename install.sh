@@ -294,6 +294,16 @@ if [ ! -x "$(command -v python3.9)" -a ! -x "$(command -v python3.7)" ] \
   sudo apt-get update -y
   sudo apt-get install --no-install-recommends -y python3.9 python3.9-dev
 fi
+if [ -x "$(command -v python3.9)" ] && ! python3.9 -c "import distutils.cmd" 2> /dev/null \
+   && grep -q "^VERSION_CODENAME=bookworm" /etc/os-release; then
+  # pip needs distutils on Python 3.9. Debian ships it in python3-distutils, whose
+  # Bullseye (3.9) version conflicts with Bookworm's (3.11): extract its files.
+  echo "Installing distutils for Python 3.9 from Raspbian Bullseye"
+  rm -rf /tmp/py39-distutils && mkdir -p /tmp/py39-distutils
+  (cd /tmp/py39-distutils && apt-get download python3-distutils/bullseye && dpkg-deb -x python3-distutils_*_all.deb .)
+  sudo cp -r /tmp/py39-distutils/usr/lib/python3.9/distutils/. /usr/lib/python3.9/distutils/
+  rm -rf /tmp/py39-distutils
+fi
 if [ -x "$(command -v python3.9)" ] ; then
   py_ver=3.9
 elif [ -x "$(command -v python3.7)" ] ; then

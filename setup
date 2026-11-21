@@ -105,7 +105,7 @@ cat "${boot_fw}/cmdline.txt"
 # Replace /etc/fstab since the non existing PARTUUID has to be changed here as well.
 echo "Editing /etc/fstab."
 sed -i -e "s|PARTUUID=........-01|/dev/mmcblk0p1|" -e "s|PARTUUID=........-02|/dev/mmcblk0p2|" /etc/fstab
-cat "/etc/fstab" | grep "^/dev/"
+cat "/etc/fstab" | grep "^/dev/" || true
 
 echo "Setting gpu_mem."
 GPU_MEM=16
