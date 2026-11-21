@@ -217,7 +217,18 @@ sudo apt-get install --no-install-recommends -y postgresql libpq-dev git python3
 # Kernel headers: Bookworm kernels are linux-image-rpi-<flavour>, with matching
 # linux-headers-rpi-<flavour> packages; older releases use raspberrypi-kernel-headers.
 kernel_headers=$(dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 'linux-image-rpi-*' 2>/dev/null | awk '$1 == "ii" && $2 ~ /^linux-image-rpi-[a-z0-9]+$/ { sub("^linux-image-", "linux-headers-", $2); print $2 }' || true)
-sudo apt-get install --no-install-recommends -y gcc make ${kernel_headers:-raspberrypi-kernel-headers}
+sudo apt-get install --no-install-recommends -y gcc make device-tree-compiler ${kernel_headers:-raspberrypi-kernel-headers}
+
+# Recent kernel headers packages don't ship scripts/dtc/dtc, which kbuild uses
+# to build the drivers' device tree overlays: use the system one.
+for dir in /lib/modules/*/build
+do
+    if [ ! -x "${dir}/scripts/dtc/dtc" ]
+    then
+        mkdir -p "${dir}/scripts/dtc"
+        ln -s /usr/bin/dtc "${dir}/scripts/dtc/dtc"
+    fi
+done
 
 if [ "${boot_fw}" != "/boot" ]
 then
@@ -245,8 +256,9 @@ build_and_install_driver() {
     for dir in /lib/modules/*/build
     do
         kernel=$(basename $(dirname ${dir}))
-        make KERNELRELEASE=${kernel}
-        sudo make install KERNELRELEASE=${kernel}
+        # The ERR trap is not inherited by functions: fail explicitly.
+        make KERNELRELEASE=${kernel} || exit 1
+        sudo make install KERNELRELEASE=${kernel} || exit 1
         sync_boot_config
         make clean KERNELRELEASE=${kernel}
     done
@@ -307,8 +319,16 @@ cd ${inst_dir}/pynab
 sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/nabblockly
 sudo git config --system --add safe.directory ${inst_dir}/pynab/nabblockly
 cd ${inst_dir}/pynab/nabblockly
-# Until we can get OTP 24 from Raspian or Erlang Solutions, get an older rebar binary
-sudo -u ${owner} wget https://github.com/erlang/rebar3/releases/download/3.15.1/rebar3 && chmod +x rebar3
+# rebar3 must match the OTP release: 3.15.1 for OTP <= 23 (Bullseye),
+# 3.22.1 for OTP 24 to 26 (Bookworm has OTP 25).
+otp_release=$(erl -noshell -eval 'io:format("~s", [erlang:system_info(otp_release)]), halt().')
+if [ "${otp_release}" -ge 24 ]
+then
+    rebar3_version=3.22.1
+else
+    rebar3_version=3.15.1
+fi
+sudo -u ${owner} wget https://github.com/erlang/rebar3/releases/download/${rebar3_version}/rebar3 && chmod +x rebar3
 sudo apt-get install --no-install-recommends -y g++
 sudo -u ${owner} ./rebar3 release
 
