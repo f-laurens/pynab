@@ -40,9 +40,15 @@ case ${pynab_branch} in
         ;;
 esac
 
+# Drivers without kernel 6.4+ support upstream yet: use forks.
+ears_repository="Wulfaz/tagtagtag-ears"
+ears_branch="kernel-6.12"
+st25_repository="Wulfaz/st25r391x"
+st25_branch="kernel-6.12"
+
 LC_ALL=C
 
-if [ -d "/boot/dietpi" ]
+if [ -d "/boot/dietpi" -o -d "/var/lib/dietpi" ]
 then
     # DietPi distro
     distro="dietpi"
@@ -53,6 +59,14 @@ then
 else
     echo "$(basename ${0}): unsupported Linux distribution!"
     exit 3
+fi
+
+# Boot (FAT) partition: /boot/firmware since Bookworm, /boot before.
+if [ -f "/boot/firmware/config.txt" ]
+then
+    boot_fw="/boot/firmware"
+else
+    boot_fw="/boot"
 fi
 
 owner=$(getent passwd 1000 | cut -d: -f1)
@@ -84,9 +98,9 @@ echo "Doing setup for ${pynab_repository} ${pynab_branch} branch${pynab_tag}."
 
 # Edit /boot/cmdline.txt since it contains root device mapping to a PARTUUID that
 # changed during parted resize when image was built.
-echo "Editing /boot/cmdline.txt."
-sed -i "s|root=PARTUUID=........-02|root=/dev/mmcblk0p2|" /boot/cmdline.txt
-cat "/boot/cmdline.txt"
+echo "Editing ${boot_fw}/cmdline.txt."
+sed -i "s|root=PARTUUID=........-02|root=/dev/mmcblk0p2|" ${boot_fw}/cmdline.txt
+cat "${boot_fw}/cmdline.txt"
 
 # Replace /etc/fstab since the non existing PARTUUID has to be changed here as well.
 echo "Editing /etc/fstab."
@@ -95,29 +109,29 @@ cat "/etc/fstab" | grep "^/dev/"
 
 echo "Setting gpu_mem."
 GPU_MEM=16
-if grep -q "^gpu_mem.*=" /boot/config.txt
+if grep -q "^gpu_mem.*=" ${boot_fw}/config.txt
 then
-    sed -i "s/\(gpu_mem.*\)=.*/\1=${GPU_MEM}/" /boot/config.txt
+    sed -i "s/\(gpu_mem.*\)=.*/\1=${GPU_MEM}/" ${boot_fw}/config.txt
 else
-    echo "gpu_mem=${GPU_MEM}" >> /boot/config.txt
+    echo "gpu_mem=${GPU_MEM}" >> ${boot_fw}/config.txt
 fi
-cat /boot/config.txt | grep "gpu_mem.*="
+cat ${boot_fw}/config.txt | grep "gpu_mem.*="
 
 echo "Disabling onboard sound."
-if grep -q "^dtparam=audio" /boot/config.txt
+if grep -q "^dtparam=audio" ${boot_fw}/config.txt
 then
-    sed -i "s/dtparam=audio.*/dtparam=audio=off/" /boot/config.txt
+    sed -i "s/dtparam=audio.*/dtparam=audio=off/" ${boot_fw}/config.txt
 else
-    echo "dtparam=audio=off" >> /boot/config.txt
+    echo "dtparam=audio=off" >> ${boot_fw}/config.txt
 fi
-cat /boot/config.txt | grep "dtparam=audio"
+cat ${boot_fw}/config.txt | grep "dtparam=audio"
 
 echo "Enabling DAC for Maker Faire 2018 cards."
-if ! grep -q "^dtoverlay=hifiberry-dac" /boot/config.txt
+if ! grep -q "^dtoverlay=hifiberry-dac" ${boot_fw}/config.txt
 then
-    echo "dtoverlay=hifiberry-dac" >> /boot/config.txt
+    echo "dtoverlay=hifiberry-dac" >> ${boot_fw}/config.txt
 fi
-cat /boot/config.txt | grep "dtoverlay=hifiberry-dac"
+cat ${boot_fw}/config.txt | grep "dtoverlay=hifiberry-dac"
 
 if [ "${install_env}" == "ci-chroot" ]
 then
@@ -143,30 +157,37 @@ then
 
     if [ "${distro}" == "raspios"  ]
     then
-        if [ ! -f "/boot/userconf.txt" ]
+        if [ ! -f "${boot_fw}/userconf.txt" ]
         then
             # make sure 'pi' user has default 'raspberry' password
-            echo 'pi:$y$j9T$9ZU7FXeU7PVHm49rB5Hbe.$MHZMLJfNfXBFbYgGwg/TNjADIRbna.Epxzd/MrqPJM9' > /boot/userconf.txt
+            echo 'pi:$y$j9T$9ZU7FXeU7PVHm49rB5Hbe.$MHZMLJfNfXBFbYgGwg/TNjADIRbna.Epxzd/MrqPJM9' > ${boot_fw}/userconf.txt
         fi
-        if [ ! -f "/boot/ssh" ]
+        if [ ! -f "${boot_fw}/ssh" ]
         then
             # enable SSH
-            touch /boot/ssh
+            touch ${boot_fw}/ssh
         fi
     elif [ "${distro}" == "dietpi" ]
     then
         echo "Setting DietPi 'first boot' parameters."
-        sed -i "s/\(AUTO_SETUP_KEYBOARD_LAYOUT\)=.*/\1=fr/" /boot/dietpi.txt
-        sed -i "s/\(AUTO_SETUP_TIMEZONE\)=.*/\1=Europe\/Paris/" /boot/dietpi.txt
-        sed -i "s/\(AUTO_SETUP_NET_WIFI_ENABLED\)=.*/\1=1/" /boot/dietpi.txt
-        sed -i "s/\(AUTO_SETUP_NET_WIFI_COUNTRY_CODE\)=.*/\1=FR/" /boot/dietpi.txt
-        sed -i "s/\(AUTO_SETUP_NET_HOSTNAME\)=.*/\1=Nabaztag/" /boot/dietpi.txt
-        sed -i "s/\(AUTO_SETUP_HEADLESS\)=.*/\1=1/" /boot/dietpi.txt
+        set_dietpi_txt() {
+            # Bookworm images also keep a copy of dietpi.txt on the FAT partition
+            for dietpi_txt in /boot/dietpi.txt /boot/firmware/dietpi.txt
+            do
+                if [ -f "${dietpi_txt}" ]; then sed -i "${1}" "${dietpi_txt}"; fi
+            done
+        }
+        set_dietpi_txt "s/\(AUTO_SETUP_KEYBOARD_LAYOUT\)=.*/\1=fr/"
+        set_dietpi_txt "s/\(AUTO_SETUP_TIMEZONE\)=.*/\1=Europe\/Paris/"
+        set_dietpi_txt "s/\(AUTO_SETUP_NET_WIFI_ENABLED\)=.*/\1=1/"
+        set_dietpi_txt "s/\(AUTO_SETUP_NET_WIFI_COUNTRY_CODE\)=.*/\1=FR/"
+        set_dietpi_txt "s/\(AUTO_SETUP_NET_HOSTNAME\)=.*/\1=Nabaztag/"
+        set_dietpi_txt "s/\(AUTO_SETUP_HEADLESS\)=.*/\1=1/"
         # -1=Nginx rather than -2=Lighttpd (DietPi default):
-        sed -i "s/\(AUTO_SETUP_WEB_SERVER_INDEX\)=.*/\1=-1/" /boot/dietpi.txt
+        set_dietpi_txt "s/\(AUTO_SETUP_WEB_SERVER_INDEX\)=.*/\1=-1/"
         # -4=Daemon + Drift rather than 2=boot + daily (DietPi default):
-        sed -i "s/\(CONFIG_NTP_MODE\)=.*/\1=4/" /boot/dietpi.txt
-        sed -i "s/\(CONFIG_SERIAL_CONSOLE_ENABLE\)=.*/\1=0/" /boot/dietpi.txt
+        set_dietpi_txt "s/\(CONFIG_NTP_MODE\)=.*/\1=4/"
+        set_dietpi_txt "s/\(CONFIG_SERIAL_CONSOLE_ENABLE\)=.*/\1=0/"
     fi
 
     echo "Setting hostname."
@@ -193,7 +214,32 @@ echo "Installing required packages."
 sudo apt-get update -y
 sudo apt-get dist-upgrade -y
 sudo apt-get install --no-install-recommends -y postgresql libpq-dev git python3 python3-venv python3-dev gettext nginx openssl libssl-dev libffi-dev libmpg123-dev libasound2-dev libatlas-base-dev libgfortran5 libopenblas-dev liblapack-dev zram-tools
-sudo apt-get install --no-install-recommends -y gcc make raspberrypi-kernel-headers
+# Kernel headers: Bookworm kernels are linux-image-rpi-<flavour>, with matching
+# linux-headers-rpi-<flavour> packages; older releases use raspberrypi-kernel-headers.
+kernel_headers=$(dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 'linux-image-rpi-*' 2>/dev/null | awk '$1 == "ii" && $2 ~ /^linux-image-rpi-[a-z0-9]+$/ { sub("^linux-image-", "linux-headers-", $2); print $2 }' || true)
+sudo apt-get install --no-install-recommends -y gcc make ${kernel_headers:-raspberrypi-kernel-headers}
+
+if [ "${boot_fw}" != "/boot" ]
+then
+    # Driver Makefiles still write /boot/config.txt and /boot/overlays:
+    # point them to the firmware partition.
+    [ -e /boot/overlays ] || ln -s firmware/overlays /boot/overlays
+    if [ -f /boot/config.txt -a ! -L /boot/config.txt ]
+    then
+        mv /boot/config.txt /boot/config.txt.orig
+    fi
+    [ -e /boot/config.txt ] || ln -s firmware/config.txt /boot/config.txt
+fi
+
+sync_boot_config() {
+    # 'sed -i' replaces the /boot/config.txt symlink with a regular file:
+    # move the edited file back to the firmware partition.
+    if [ "${boot_fw}" != "/boot" -a -f /boot/config.txt -a ! -L /boot/config.txt ]
+    then
+        mv /boot/config.txt ${boot_fw}/config.txt
+        ln -s firmware/config.txt /boot/config.txt
+    fi
+}
 
 build_and_install_driver() {
     for dir in /lib/modules/*/build
@@ -201,6 +247,7 @@ build_and_install_driver() {
         kernel=$(basename $(dirname ${dir}))
         make KERNELRELEASE=${kernel}
         sudo make install KERNELRELEASE=${kernel}
+        sync_boot_config
         make clean KERNELRELEASE=${kernel}
     done
 }
@@ -216,7 +263,7 @@ build_and_install_driver
 echo "Installing ears driver."
 sudo mkdir -p ${inst_dir}/tagtagtag-ears
 sudo chown ${owner}:${group} ${inst_dir}/tagtagtag-ears
-sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/tagtagtag-ears ${inst_dir}/tagtagtag-ears
+sudo -u ${owner} git clone --depth 1 -b ${ears_branch} https://github.com/${ears_repository} ${inst_dir}/tagtagtag-ears
 sudo git config --system --add safe.directory ${inst_dir}/tagtagtag-ears
 cd ${inst_dir}/tagtagtag-ears
 build_and_install_driver
@@ -232,14 +279,14 @@ build_and_install_driver
 echo "Installing RFID reader driver for 2022 NFC card."
 sudo mkdir -p ${inst_dir}/st25r391x
 sudo chown ${owner}:${group} ${inst_dir}/st25r391x
-sudo -u ${owner} git clone --depth 1 -b ${st25_branch} https://github.com/pguyot/st25r391x ${inst_dir}/st25r391x
+sudo -u ${owner} git clone --depth 1 -b ${st25_branch} https://github.com/${st25_repository} ${inst_dir}/st25r391x
 sudo git config --system --add safe.directory ${inst_dir}/st25r391x
 cd ${inst_dir}/st25r391x
 build_and_install_driver
 
 echo "Disabling 2022 NFC card driver and making sure i2c-dev is enabled"
 # Disable this driver as it conflicts with cr14 (nabboot will do the switch)
-sed /boot/config.txt -i -e "s/^dtoverlay=st25r391x/#dtoverlay=st25r391x/"
+sed ${boot_fw}/config.txt -i -e "s/^dtoverlay=st25r391x/#dtoverlay=st25r391x/"
 # Enable i2c-dev
 grep -q -E "^i2c-dev" /etc/modules || printf "i2c-dev\n" >> /etc/modules
 
