@@ -109,6 +109,16 @@ jobs:
             sudo apt-get update -y --allow-releaseinfo-change
             echo GITHUB_BRANCH=${{ steps.image_and_branch_name.outputs.LOCAL_BRANCH }}
             echo GITHUB_REPOSITORY=${{ github.repository }}
+            # Bookworm images mount the boot (FAT) partition on /boot/firmware, while
+            # arm-runner-action mounts it on /boot (hiding the root fs /boot content):
+            # move it where the image expects it, and back before the action's cleanup.
+            remount_boot=no
+            if grep -qE '^[^#]+[[:space:]]/boot/firmware[[:space:]]' /etc/fstab && mountpoint -q /boot; then
+                bootdev=$(findmnt -n -o SOURCE /boot)
+                sudo umount /boot
+                sudo mount "${bootdev}" /boot/firmware
+                remount_boot=yes
+            fi
             cd /tmp
             sudo cp -p /opt/pynab/setup /tmp/setup
             if [ ${{ steps.image_and_branch_name.outputs.CLONE_RELEASE }} = "yes" ]; then
@@ -125,6 +135,10 @@ jobs:
             sudo rm /tmp/setup
             sudo apt-get autoremove --purge -y
             sudo apt-get clean
+            if [ "${remount_boot}" = "yes" ]; then
+                sudo umount /boot/firmware
+                sudo mount "${bootdev}" /boot
+            fi
 
       - name: Compress the release image
         run: |
