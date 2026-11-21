@@ -73,13 +73,24 @@ if [ $makerfaire2018 -eq 1 ]; then
   fi
 fi
 
+sync_boot_config() {
+  # Bookworm+: the firmware partition is /boot/firmware and /boot/config.txt is a
+  # symlink to it, kept for driver Makefiles. 'sed -i' replaces that symlink with a
+  # regular file: move the edited file back to the firmware partition.
+  if [ -f /boot/firmware/config.txt -a -f /boot/config.txt -a ! -L /boot/config.txt ] \
+     && ! grep -q "has moved to /boot/firmware" /boot/config.txt; then
+    sudo mv /boot/config.txt /boot/firmware/config.txt
+    sudo ln -s firmware/config.txt /boot/config.txt
+  fi
+}
+
 build_and_install_driver() {
   driver=${1}
   for dir in /lib/modules/*/build
   do
     kernel=$(basename $(dirname ${dir}))
     echo "Building ${driver} driver for kernel ${kernel}"
-    make KERNELRELEASE=${kernel} && sudo make install KERNELRELEASE=${kernel} && make clean KERNELRELEASE=${kernel}
+    make KERNELRELEASE=${kernel} && sudo make install KERNELRELEASE=${kernel} && sync_boot_config && make clean KERNELRELEASE=${kernel}
   done
 }
 
@@ -107,7 +118,7 @@ if [ $upgrade -eq 1 ]; then
   else
     sudo mkdir -p ${inst_dir}/tagtagtag-ears
     sudo chown ${uid}:${gid} ${inst_dir}/tagtagtag-ears
-    git clone https://github.com/pguyot/tagtagtag-ears ${inst_dir}/tagtagtag-ears
+    git clone -b kernel-6.12 https://github.com/Wulfaz/tagtagtag-ears ${inst_dir}/tagtagtag-ears
     cd ${inst_dir}/tagtagtag-ears
     build_and_install_driver tagtagtag-ears
     sudo touch /tmp/pynab.upgrade.reboot
@@ -148,11 +159,11 @@ if [ $upgrade -eq 1 ]; then
   else
     sudo mkdir -p ${inst_dir}/st25r391x
     sudo chown ${uid}:${gid} ${inst_dir}/st25r391x
-    git clone https://github.com/pguyot/st25r391x ${inst_dir}/st25r391x
+    git clone -b kernel-6.12 https://github.com/Wulfaz/st25r391x ${inst_dir}/st25r391x
     cd ${inst_dir}/st25r391x
     build_and_install_driver st25r391x
     # Disable this driver as it conflicts with cr14 (nabboot will do the switch)
-    sudo sed /boot/config.txt -i -e "s/^dtoverlay=st25r391x/#dtoverlay=st25r391x/"
+    sudo sed --follow-symlinks /boot/config.txt -i -e "s/^dtoverlay=st25r391x/#dtoverlay=st25r391x/"
     # Enable i2c-dev
     grep -q -E "^i2c-dev" /etc/modules || printf "i2c-dev\n" | sudo tee -a /etc/modules
     sudo touch /tmp/pynab.upgrade.reboot
@@ -215,7 +226,7 @@ if [ $makerfaire2018 -eq 0 ]; then
   fi
 
   # Maker Faire card has no mic, no need to install Kaldi
-  kaldi_release="e4940d045"
+  kaldi_release="0ff452b"
   kaldi_dir="/opt/kaldi"; kaldi_pkgconfig="/usr/lib/pkgconfig/kaldi-asr.pc"
   if [[ -f "${kaldi_pkgconfig}" && "$(grep -c ${kaldi_release} ${kaldi_pkgconfig})" -eq 0 ]]; then
      # Installed Kaldi does not match needed version: remove it
@@ -234,9 +245,15 @@ if [ $makerfaire2018 -eq 0 ]; then
     if [ "${kaldi_platform}" = "raspbian11-armv7l" ]; then
       kaldi_platform="raspbian11-armv6l"
     fi
+    if [ "${kaldi_platform}" = "raspbian12-armv7l" ]; then
+      kaldi_platform="raspbian12-armv6l"
+    fi
     echo "Installing precompiled ${kaldi_platform} Kaldi into ${kaldi_dir}"
     kaldi_archive="${kaldi_release}/kaldi-${kaldi_release}-linux_${kaldi_platform}.tar.xz"
-    wget -O - -q https://github.com/pguyot/kaldi/releases/download/${kaldi_archive} | sudo tar xJ -C /
+    wget -O - -q https://github.com/pguyot/kaldi/releases/download/${kaldi_archive} | sudo tar xJ -C / || {
+      echo "No precompiled Kaldi ${kaldi_release} for ${kaldi_platform}"
+      exit 1
+    }
     sudo ldconfig
 
     # Fix upgrade of py-kaldi-asr
@@ -262,6 +279,21 @@ if [ $makerfaire2018 -eq 0 ]; then
 fi
 
 cd ${root_dir}
+if [ ! -x "$(command -v python3.9)" -a ! -x "$(command -v python3.7)" ] \
+   && grep -q "^VERSION_CODENAME=bookworm" /etc/os-release \
+   && [ "$(dpkg --print-architecture)" = "armhf" ]; then
+  # Precompiled Kaldi and Snips wheels only exist for Python 3.7 and 3.9:
+  # install Python 3.9 from Raspbian Bullseye, pinned so that nothing else
+  # comes from Bullseye unless explicitly requested.
+  echo "Installing Python 3.9 from Raspbian Bullseye"
+  if [ $upgrade -eq 1 ]; then
+    echo "Installing Python 3.9 - 8/15" > /tmp/pynab.upgrade
+  fi
+  echo "deb http://raspbian.raspberrypi.com/raspbian/ bullseye main" | sudo tee /etc/apt/sources.list.d/pynab-bullseye.list > /dev/null
+  printf "Package: *\nPin: release n=bullseye\nPin-Priority: 100\n" | sudo tee /etc/apt/preferences.d/pynab-bullseye > /dev/null
+  sudo apt-get update -y
+  sudo apt-get install --no-install-recommends -y python3.9 python3.9-dev
+fi
 if [ -x "$(command -v python3.9)" ] ; then
   py_ver=3.9
 elif [ -x "$(command -v python3.7)" ] ; then
@@ -278,7 +310,21 @@ if [[ -f "${venv_cfg}" && "$(grep -c version\ =\ ${py_ver} ${venv_cfg})" -eq 0 ]
 fi
 if [ ! -d "venv" ]; then
   echo "Creating Python ${py_ver} virtual environment"
-  ${python} -m venv venv
+  if ! ${python} -m venv venv; then
+    # Debian's ensurepip is in python3.X-venv, which can't be installed for
+    # Python 3.9 on Bookworm: bootstrap pip with get-pip.py instead.
+    rm -rf venv
+    ${python} -m venv --without-pip venv
+    wget -O /tmp/get-pip.py -q https://bootstrap.pypa.io/pip/${py_ver}/get-pip.py \
+      || wget -O /tmp/get-pip.py -q https://bootstrap.pypa.io/get-pip.py
+    venv/bin/python /tmp/get-pip.py --no-cache-dir
+    rm -f /tmp/get-pip.py
+  fi
+fi
+
+# Precompiled wheels for Raspberry Pi (numpy, scipy, scikit-learn...)
+if [ "$(dpkg --print-architecture)" = "armhf" ] && ! grep -qs "piwheels" /etc/pip.conf; then
+  printf "[global]\nextra-index-url=https://www.piwheels.org/simple\n" | sudo tee -a /etc/pip.conf > /dev/null
 fi
 
 echo "Installing PyPi requirements"
