@@ -327,8 +327,9 @@ if [ ! -d "venv" ]; then
     ${python} -m venv --without-pip venv
     wget -O /tmp/get-pip.py -q https://bootstrap.pypa.io/pip/${py_ver}/get-pip.py \
       || wget -O /tmp/get-pip.py -q https://bootstrap.pypa.io/get-pip.py
-    # pip 25 rejects the '#egg=name==version' URLs used by 'snips_nlu download'
-    venv/bin/python /tmp/get-pip.py --no-cache-dir "pip<25"
+    # pip 25 rejects the '#egg=name==version' URLs used by 'snips_nlu download',
+    # which also needs pkg_resources (setuptools, no longer installed by get-pip)
+    venv/bin/python /tmp/get-pip.py --no-cache-dir "pip<25" "setuptools<70" wheel
     rm -f /tmp/get-pip.py
   fi
 fi
