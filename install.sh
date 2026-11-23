@@ -350,7 +350,7 @@ if [ "$(dpkg --print-architecture)" = "armhf" ] && [ "${debian_version_id}" -ge 
   # Kernel 6.6+ (Bookworm) numbers GPIOs from 512, which breaks RPi.GPIO edge
   # detection ("Could not set edge detection"): use its drop-in replacement
   # rpi-lgpio, which goes through /dev/gpiochip. lgpio is built from source.
-  sudo apt-get install --no-install-recommends -y swig liblgpio-dev
+  sudo apt-get install --no-install-recommends -y gcc swig liblgpio-dev
   # Both packages install RPi/GPIO: remove RPi.GPIO first.
   venv/bin/pip uninstall -y RPi.GPIO > /dev/null 2>&1 || true
   grep -v "^RPi\.GPIO" requirements.txt > /tmp/pynab-requirements.txt
