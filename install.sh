@@ -345,7 +345,21 @@ if [ $upgrade -eq 1 ]; then
 fi
 # Start with wheel which is required to compile some of the other requirements
 venv/bin/pip install --no-cache-dir wheel
-venv/bin/pip install --no-cache-dir -r requirements.txt
+debian_version_id=$(. /etc/os-release && echo "${VERSION_ID:-0}")
+if [ "$(dpkg --print-architecture)" = "armhf" ] && [ "${debian_version_id}" -ge 12 ] 2>/dev/null; then
+  # Kernel 6.6+ (Bookworm) numbers GPIOs from 512, which breaks RPi.GPIO edge
+  # detection ("Could not set edge detection"): use its drop-in replacement
+  # rpi-lgpio, which goes through /dev/gpiochip. lgpio is built from source.
+  sudo apt-get install --no-install-recommends -y swig liblgpio-dev
+  # Both packages install RPi/GPIO: remove RPi.GPIO first.
+  venv/bin/pip uninstall -y RPi.GPIO > /dev/null 2>&1 || true
+  grep -v "^RPi\.GPIO" requirements.txt > /tmp/pynab-requirements.txt
+  echo "rpi-lgpio==0.6" >> /tmp/pynab-requirements.txt
+  venv/bin/pip install --no-cache-dir -r /tmp/pynab-requirements.txt
+  rm -f /tmp/pynab-requirements.txt
+else
+  venv/bin/pip install --no-cache-dir -r requirements.txt
+fi
 
 if [ $makerfaire2018 -eq 0 ]; then
   if [ $upgrade -eq 1 ]; then
