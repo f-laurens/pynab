@@ -42,7 +42,7 @@ jobs:
           sudo bash install_mkl.sh
           wget -q -O - "https://github.com/pguyot/kaldi/releases/download/0ff452b/kaldi-0ff452b-linux_ubuntu22.04-x86_64.tar.xz" | sudo tar xJ -C /
           sudo ldconfig
-          python -m pip install --upgrade pip setuptools wheel setuptools-rust
+          python -m pip install --upgrade pip setuptools wheel setuptools-rust "Cython>=3,<4" "numpy==2.4.6"
 
       # On x86_64 these come from source (git): their setup.py needs
       # setuptools-rust / a Kaldi install, so build them without isolation.
