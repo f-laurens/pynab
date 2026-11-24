@@ -1,6 +1,6 @@
 name: 🧪 Tests (Python 3.11)
 # Same steps as tests.yml, with Bookworm's Python 3.11 and the Python 3.11
-# packages from requirements.txt (py-kaldi-asr 0.6.0, snips-nlu 0.20.2.2...).
+# packages from requirements.txt (py-kaldi-asr 0.6.0, snips-nlu 0.20.2.3...).
 on:
   push:
     branches:
