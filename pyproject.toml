@@ -8,5 +8,11 @@ exclude = [
 ]
 namespace_packages = true
 
+# mypy 0.950 cannot parse the stubs of NumPy 2.x (Python 3.11 venvs): treat
+# numpy as untyped. Only nabd/asr.py uses it.
+[[tool.mypy.overrides]]
+module = ["numpy", "numpy.*"]
+follow_imports = "skip"
+
 [tool.django-stubs]
 django_settings_module = "nabweb.settings"
