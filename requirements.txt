@@ -1,3 +1,6 @@
+# Lines marked python_version < '3.11' (or == '3.7' / == '3.9') are legacy:
+# they serve Buster/Bullseye images and Bookworm rabbits whose venv has not
+# been rebuilt yet. Delete them once all rabbits run Bookworm or later.
 # Direct dependencies
 wheel
 Django==4.2.18; python_version != '3.7'
@@ -36,7 +39,10 @@ isort==5.10.1
 pre_commit==2.17.0
 pyalsaaudio==0.9.0; sys_platform == 'linux'
 rpi-ws281x==4.3.3; sys_platform == 'linux' and ('armv6l' in platform_machine or 'armv7l' in platform_machine or 'aarch64' in platform_machine)
-RPi.GPIO==0.7.1; sys_platform == 'linux' and ('armv6l' in platform_machine or 'armv7l' in platform_machine or 'aarch64' in platform_machine)
+# Kernel 6.6+ (Bookworm) breaks RPi.GPIO edge detection: Python 3.11 venvs
+# (Bookworm) use its drop-in replacement rpi-lgpio (needs liblgpio-dev)
+RPi.GPIO==0.7.1; sys_platform == 'linux' and ('armv6l' in platform_machine or 'armv7l' in platform_machine or 'aarch64' in platform_machine) and python_version < '3.11'
+rpi-lgpio==0.6; sys_platform == 'linux' and ('armv6l' in platform_machine or 'armv7l' in platform_machine or 'aarch64' in platform_machine) and python_version >= '3.11'
 smbus2==0.4.1
 
 https://github.com/pguyot/snips-nlu/releases/download/0.20.2.1/snips_nlu-0.20.2.1-py3-none-any.whl; python_version < '3.11'

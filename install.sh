@@ -369,9 +369,14 @@ if [ "$(dpkg --print-architecture)" = "armhf" ] && [ "${debian_version_id}" -ge 
   # detection ("Could not set edge detection"): use its drop-in replacement
   # rpi-lgpio, which goes through /dev/gpiochip. lgpio is built from source.
   sudo apt-get install --no-install-recommends -y gcc swig liblgpio-dev
-  # Both packages install RPi/GPIO: remove RPi.GPIO first.
-  venv/bin/pip uninstall -y RPi.GPIO > /dev/null 2>&1 || true
-  grep -v "^RPi\.GPIO" requirements.txt > /tmp/pynab-requirements.txt
+  # Both packages own the RPi/GPIO files: if RPi.GPIO got installed (even over
+  # rpi-lgpio), remove both so that rpi-lgpio is reinstalled with its files.
+  if venv/bin/pip show RPi.GPIO > /dev/null 2>&1; then
+    venv/bin/pip uninstall -y RPi.GPIO rpi-lgpio > /dev/null 2>&1 || true
+  fi
+  # requirements.txt already selects rpi-lgpio on Python 3.11; this also
+  # covers Bookworm rabbits still on a Python 3.9 venv (legacy).
+  grep -v -e "^RPi\.GPIO" -e "^rpi-lgpio" requirements.txt > /tmp/pynab-requirements.txt
   echo "rpi-lgpio==0.6" >> /tmp/pynab-requirements.txt
   venv/bin/pip install --no-cache-dir -r /tmp/pynab-requirements.txt
   rm -f /tmp/pynab-requirements.txt
