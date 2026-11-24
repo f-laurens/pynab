@@ -357,6 +357,12 @@ if [ $upgrade -eq 1 ]; then
 fi
 # Start with wheel which is required to compile some of the other requirements
 venv/bin/pip install --no-cache-dir wheel
+if [ "${py_ver}" = "3.11" ]; then
+  # Bookworm's venv comes with pip 23.0.1, which rejects piwheels wheels whose
+  # PEP 658 metadata spells the name differently (scikit_learn vs scikit-learn)
+  # and falls back to source builds. pip 25 rejects '#egg=name==version' URLs.
+  venv/bin/python -m pip install --no-cache-dir --upgrade "pip>=23.1,<25"
+fi
 debian_version_id=$(. /etc/os-release && echo "${VERSION_ID:-0}")
 if [ "$(dpkg --print-architecture)" = "armhf" ] && [ "${debian_version_id}" -ge 12 ] 2>/dev/null; then
   # Kernel 6.6+ (Bookworm) numbers GPIOs from 512, which breaks RPi.GPIO edge

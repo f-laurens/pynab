@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt-get install -y libasound2-dev libmpg123-dev libatlas-base-dev curl
+          sudo apt-get install -y libasound2-dev libmpg123-dev libatlas-base-dev libpq-dev curl
           wget -q -O install_mkl.sh https://raw.githubusercontent.com/kaldi-asr/kaldi/aef1d98603b68e6cf3a973e9dcd71915e2a175fe/tools/extras/install_mkl.sh
           sudo bash install_mkl.sh
           wget -q -O - "https://github.com/pguyot/kaldi/releases/download/0ff452b/kaldi-0ff452b-linux_ubuntu22.04-x86_64.tar.xz" | sudo tar xJ -C /
@@ -55,7 +55,9 @@ jobs:
 
       - name: Install requirements
         run: |
-          pip install -r requirements.txt
+          # The git requirements were built above (without build isolation)
+          grep -v "git+https://" requirements.txt > /tmp/requirements-nogit.txt
+          pip install -r /tmp/requirements-nogit.txt
           pip list | grep -i -E "^(django|numpy|scipy|scikit-learn|snips|py-kaldi|future|pytest) "
 
       - name: Install kaldi models
