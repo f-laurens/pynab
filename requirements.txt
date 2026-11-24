@@ -2,9 +2,16 @@
 wheel
 Django==4.2.18; python_version != '3.7'
 Django==3.2.25; python_version == '3.7'
-django-stubs==1.11.0
-django-stubs-ext==0.4.0
-mypy==0.950
+django-stubs==1.11.0; python_version < '3.11'
+django-stubs==4.2.7; python_version >= '3.11'
+django-stubs-ext==0.4.0; python_version < '3.11'
+django-stubs-ext==4.2.7; python_version >= '3.11'
+# mypy 0.950 parses stubs with Python 3.6 grammar and cannot read the
+# current NumPy/types-pytz stubs installed on Python 3.11
+mypy==0.950; python_version < '3.11'
+mypy==1.7.1; python_version >= '3.11'
+types-pytz==2026.6.0.20261122; python_version >= '3.11'
+types-PyYAML==6.0.12.20261122; python_version >= '3.11'
 gunicorn==22.0.0
 lockfile==0.12.2
 Mastodon.py==1.5.1
@@ -73,7 +80,8 @@ https://github.com/pguyot/pynfcdev/releases/download/v0.7.4/pynfcdev-0.7.4-py3-n
 ndef==0.2
 
 # Indirect frozen dependencies
-mypy_extensions==0.4.3
+mypy_extensions==0.4.3; python_version < '3.11'
+mypy_extensions==1.0.0; python_version >= '3.11'
 # Latest typing_extensions compatible with latest meteofrance-api
 typing_extensions==4.7.1; python_version == '3.7'
 typing_extensions==4.12.2; python_version != '3.7'
