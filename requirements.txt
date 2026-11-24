@@ -28,7 +28,9 @@ rpi-ws281x==4.3.3; sys_platform == 'linux' and ('armv6l' in platform_machine or 
 RPi.GPIO==0.7.1; sys_platform == 'linux' and ('armv6l' in platform_machine or 'armv7l' in platform_machine or 'aarch64' in platform_machine)
 smbus2==0.4.1
 
-https://github.com/pguyot/snips-nlu/releases/download/0.20.2.1/snips_nlu-0.20.2.1-py3-none-any.whl
+https://github.com/pguyot/snips-nlu/releases/download/0.20.2.1/snips_nlu-0.20.2.1-py3-none-any.whl; python_version < '3.11'
+# Python >= 3.11: scikit-learn 1.x, numpy 2, pip >= 25 (Wulfaz/snips-nlu)
+https://github.com/Wulfaz/snips-nlu/releases/download/v0.20.2.2/snips_nlu-0.20.2.2-py3-none-any.whl; python_version >= '3.11'
 
 # Pre-built binaries
 https://github.com/pguyot/py-kaldi-asr/releases/download/v0.5.3/py_kaldi_asr-0.5.3-cp37-cp37m-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.7'
@@ -48,9 +50,9 @@ https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_p
 https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_parsers-0.4.3-cp39-cp39-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version == '3.9'
 https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_parsers-0.4.3-cp39-cp39-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version == '3.9'
 # Python >= 3.11: py3-none wheels (ctypes-loaded Rust library, any Python 3)
-https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post1/snips_nlu_parsers-0.4.3.post1-py3-none-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version >= '3.11'
-https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post1/snips_nlu_parsers-0.4.3.post1-py3-none-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version >= '3.11'
-https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post1/snips_nlu_parsers-0.4.3.post1-py3-none-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version >= '3.11'
+https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post2/snips_nlu_parsers-0.4.3.post2-py3-none-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version >= '3.11'
+https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post2/snips_nlu_parsers-0.4.3.post2-py3-none-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version >= '3.11'
+https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post2/snips_nlu_parsers-0.4.3.post2-py3-none-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version >= '3.11'
 git+https://github.com/pguyot/snips-nlu-parsers@0.4.3-2024#subdirectory=python; sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9' and python_version < '3.11')
 
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp37-cp37m-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.7'
@@ -103,21 +105,27 @@ py==1.11.0
 virtualenv==20.13.3; python_version == '3.7'
 virtualenv==20.26.6; python_version != '3.7'
 nodeenv==1.6.0
-PyYAML==6.0
+PyYAML==6.0; python_version < '3.11'
+PyYAML==6.0.4; python_version >= '3.11'
 identify==2.4.11
 cfgv==3.3.1
 Cython==0.29.30
-numpy==1.21.4
+numpy==1.21.4; python_version < '3.11'
+numpy==2.4.6; python_version >= '3.11'
 # Latest scipy compatible with snips-nlu
-scipy==1.6.2
+scipy==1.6.2; python_version < '3.11'
+scipy==1.17.1; python_version >= '3.11'
 num2words==0.5.10
 # Latest scikit-learn compatible with latest snips-nlu
-scikit_learn==0.24.2
+scikit_learn==0.24.2; python_version < '3.11'
+scikit_learn==1.9.1; python_version >= '3.11'
 deprecation==2.1.0
 pyaml==19.12.0
 # Latest future compatible with latest snips-nlu
-future==0.17.1
-sklearn_crfsuite==0.3.6
+future==0.17.1; python_version < '3.11'
+future==1.0.0; python_version >= '3.11'
+sklearn_crfsuite==0.3.6; python_version < '3.11'
+sklearn_crfsuite==0.5.0; python_version >= '3.11'
 zipp==3.15.0; python_version == '3.7'
 zipp==3.21.0; python_version != '3.7'
 certifi==2024.12.14
@@ -135,8 +143,10 @@ distlib==0.3.9
 filelock==3.12.2 ; python_version == '3.7'
 filelock==3.19.1 ; python_version != '3.7'
 docopt==0.6.2
-joblib==1.2.0
-python_crfsuite==0.9.7
+joblib==1.2.0; python_version < '3.11'
+joblib==1.6.0; python_version >= '3.11'
+python_crfsuite==0.9.7; python_version < '3.11'
+python_crfsuite==0.9.11; python_version >= '3.11'
 tabulate==0.8.9
 tqdm==4.66.3
 requests==2.31.0; python_version == '3.7'
