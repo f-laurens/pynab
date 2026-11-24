@@ -1,0 +1,90 @@
+name: 🧪 Tests (Python 3.11)
+# Same steps as tests.yml, with Bookworm's Python 3.11 and the Python 3.11
+# packages from requirements.txt (py-kaldi-asr 0.6.0, snips-nlu 0.20.2.2...).
+on:
+  push:
+    branches:
+      - 'bookworm'
+  workflow_dispatch:
+
+jobs:
+  test_suite:
+    name: Run test suite (Python 3.11)
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout pynab
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt-get install -y libasound2-dev libmpg123-dev libatlas-base-dev curl
+          wget -q -O install_mkl.sh https://raw.githubusercontent.com/kaldi-asr/kaldi/aef1d98603b68e6cf3a973e9dcd71915e2a175fe/tools/extras/install_mkl.sh
+          sudo bash install_mkl.sh
+          wget -q -O - "https://github.com/pguyot/kaldi/releases/download/0ff452b/kaldi-0ff452b-linux_ubuntu22.04-x86_64.tar.xz" | sudo tar xJ -C /
+          sudo ldconfig
+          python -m pip install --upgrade pip setuptools wheel setuptools-rust
+
+      # On x86_64 these come from source (git): their setup.py needs
+      # setuptools-rust / a Kaldi install, so build them without isolation.
+      - name: Build source-only requirements
+        run: |
+          pip install --no-build-isolation \
+            "py-kaldi-asr @ git+https://github.com/Wulfaz/py-kaldi-asr@v0.6.0" \
+            "snips-nlu-utils @ git+https://github.com/Wulfaz/snips-nlu-utils@v0.9.1.post1#subdirectory=python" \
+            "snips-nlu-parsers @ git+https://github.com/Wulfaz/snips-nlu-parsers@v0.4.3.post2#subdirectory=python"
+
+      - name: Install requirements
+        run: |
+          pip install -r requirements.txt
+          pip list | grep -i -E "^(django|numpy|scipy|scikit-learn|snips|py-kaldi|future|pytest) "
+
+      - name: Install kaldi models
+        run: |
+          sudo mkdir -p /opt/kaldi/model/
+          sudo tar xJf asr/kaldi-nabaztag-en-adapt-r20191222.tar.xz -C /opt/kaldi/model/
+          sudo tar xJf asr/kaldi-nabaztag-fr-adapt-r20200203.tar.xz -C /opt/kaldi/model/
+
+      - name: Setup PostgreSQL database
+        run: |
+          PGPASSWORD=postgres PGHOST=localhost PGPORT=5432 psql -U postgres -d postgres -c "CREATE USER pynab PASSWORD 'pynab'; ALTER ROLE pynab CREATEDB;"
+
+      - name: Setup NLU engines
+        run: |
+          python -m snips_nlu download fr
+          python -m snips_nlu download en
+          mkdir -p nabd/nlu
+          python -m snips_nlu generate-dataset en */nlu/intent_en.yaml > nabd/nlu/nlu_dataset_en.json
+          python -m snips_nlu generate-dataset fr */nlu/intent_fr.yaml > nabd/nlu/nlu_dataset_fr.json
+          snips-nlu train nabd/nlu/nlu_dataset_en.json nabd/nlu/engine_en
+          snips-nlu train nabd/nlu/nlu_dataset_fr.json nabd/nlu/engine_fr
+
+      - name: Fake NTP synchronization
+        run: sudo mkdir -p /run/systemd/timesync/ && sudo touch /run/systemd/timesync/synchronized
+
+      - name: Check types with mypy
+        run: |
+          mypy nab*
+
+      - name: Run test suite with coverage
+        run: |
+          PGPASSWORD=pynab PGHOST=localhost PGPORT=5432 coverage run -m pytest

@@ -4,7 +4,11 @@ import sys
 import time
 import unittest
 
-import asynctest  # type: ignore
+try:
+    # Python >= 3.8 (asynctest does not work with Python >= 3.11)
+    from unittest import IsolatedAsyncioTestCase as AsyncTestCase
+except ImportError:  # Python 3.7
+    from asynctest import TestCase as AsyncTestCase  # type: ignore
 import pytest
 
 from .utils import close_old_async_connections
@@ -98,7 +102,7 @@ class TestPlaySound(unittest.TestCase):
     sys.platform != "linux", reason="Alsa is only available on Linux"
 )
 @pytest.mark.django_db
-class TestWaitUntilComplete(asynctest.TestCase):
+class TestWaitUntilComplete(AsyncTestCase):
     def setUp(self):
         from nabd.nabio import NabIO
         from nabd.sound_alsa import SoundAlsa
@@ -139,7 +143,7 @@ class TestWaitUntilComplete(asynctest.TestCase):
         before = time.time()
         await self.sound.start_playing("fr_FR/asr/failed/5.mp3")
         event = asyncio.Event()
-        self.loop.call_later(1.5, lambda: event.set())
+        asyncio.get_running_loop().call_later(1.5, lambda: event.set())
         await self.sound.wait_until_done(event)
         after = time.time()
         self.assertLess(after - before, 3.0)

@@ -279,7 +279,16 @@ if [ $makerfaire2018 -eq 0 ]; then
 fi
 
 cd ${root_dir}
-if [ ! -x "$(command -v python3.9)" -a ! -x "$(command -v python3.7)" ] \
+# Bookworm: use the system Python 3.11. Kaldi (py-kaldi-asr 0.6.0), Snips
+# (snips-nlu 0.20.2.2 and its Rust libraries) and their dependencies have
+# Python 3.11 wheels (see requirements.txt). A Python 3.9 virtual env from an
+# earlier install is replaced below, as for any Python version change.
+use_system_python311=0
+if grep -q "^VERSION_CODENAME=bookworm" /etc/os-release && [ -x "$(command -v python3.11)" ]; then
+  use_system_python311=1
+fi
+if [ $use_system_python311 -eq 0 ] \
+   && [ ! -x "$(command -v python3.9)" -a ! -x "$(command -v python3.7)" ] \
    && grep -q "^VERSION_CODENAME=bookworm" /etc/os-release \
    && [ "$(dpkg --print-architecture)" = "armhf" ]; then
   # Precompiled Kaldi and Snips wheels only exist for Python 3.7 and 3.9:
@@ -294,7 +303,8 @@ if [ ! -x "$(command -v python3.9)" -a ! -x "$(command -v python3.7)" ] \
   sudo apt-get update -y
   sudo apt-get install --no-install-recommends -y python3.9 python3.9-dev
 fi
-if [ -x "$(command -v python3.9)" ] && ! python3.9 -c "import distutils.cmd" 2> /dev/null \
+if [ $use_system_python311 -eq 0 ] \
+   && [ -x "$(command -v python3.9)" ] && ! python3.9 -c "import distutils.cmd" 2> /dev/null \
    && grep -q "^VERSION_CODENAME=bookworm" /etc/os-release; then
   # pip needs distutils on Python 3.9. Debian ships it in python3-distutils, whose
   # Bullseye (3.9) version conflicts with Bookworm's (3.11): extract its files.
@@ -304,12 +314,14 @@ if [ -x "$(command -v python3.9)" ] && ! python3.9 -c "import distutils.cmd" 2> 
   sudo cp -r /tmp/py39-distutils/usr/lib/python3.9/distutils/. /usr/lib/python3.9/distutils/
   rm -rf /tmp/py39-distutils
 fi
-if [ -x "$(command -v python3.9)" ] ; then
+if [ $use_system_python311 -eq 1 ] ; then
+  py_ver=3.11
+elif [ -x "$(command -v python3.9)" ] ; then
   py_ver=3.9
 elif [ -x "$(command -v python3.7)" ] ; then
   py_ver=3.7
 else
-  echo "Please install Python 3.7 or 3.9 (you might need to upgrade your Linux distribution)"
+  echo "Please install Python 3.7, 3.9 or 3.11 (you might need to upgrade your Linux distribution)"
   exit 1
 fi
 python=python${py_ver}

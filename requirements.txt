@@ -16,7 +16,7 @@ pytest==7.4.4
 #pytest-django==4.5.2
 pytest-django==3.8.0
 pytest-pep8==1.0.6
-asynctest==0.13.0
+asynctest==0.13.0; python_version < '3.11'
 coverage==6.3.2
 black==23.3.0; python_version == '3.7'
 black==24.10.0; python_version != '3.7'
@@ -42,7 +42,8 @@ https://github.com/pguyot/py-kaldi-asr/releases/download/v0.5.3/py_kaldi_asr-0.5
 https://github.com/Wulfaz/py-kaldi-asr/releases/download/v0.6.0/py_kaldi_asr-0.6.0-cp311-cp311-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.11'
 https://github.com/Wulfaz/py-kaldi-asr/releases/download/v0.6.0/py_kaldi_asr-0.6.0-cp311-cp311-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version == '3.11'
 https://github.com/Wulfaz/py-kaldi-asr/releases/download/v0.6.0/py_kaldi_asr-0.6.0-cp311-cp311-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version == '3.11'
-git+https://github.com/pguyot/py-kaldi-asr@v0.5.3; sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9' and python_version != '3.11')
+git+https://github.com/pguyot/py-kaldi-asr@v0.5.3; python_version < '3.11' and (sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9'))
+py-kaldi-asr @ git+https://github.com/Wulfaz/py-kaldi-asr@v0.6.0; python_version >= '3.11' and (python_version != '3.11' or (sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine)))
 
 https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_parsers-0.4.3-cp37-cp37m-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.7'
 https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_parsers-0.4.3-cp39-cp39-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.9'
@@ -53,7 +54,8 @@ https://github.com/pguyot/snips-nlu-parsers/releases/download/v0.4.3/snips_nlu_p
 https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post2/snips_nlu_parsers-0.4.3.post2-py3-none-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version >= '3.11'
 https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post2/snips_nlu_parsers-0.4.3.post2-py3-none-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version >= '3.11'
 https://github.com/Wulfaz/snips-nlu-parsers/releases/download/v0.4.3.post2/snips_nlu_parsers-0.4.3.post2-py3-none-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version >= '3.11'
-git+https://github.com/pguyot/snips-nlu-parsers@0.4.3-2024#subdirectory=python; sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9' and python_version < '3.11')
+git+https://github.com/pguyot/snips-nlu-parsers@0.4.3-2024#subdirectory=python; python_version < '3.11' and (sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9'))
+snips-nlu-parsers @ git+https://github.com/Wulfaz/snips-nlu-parsers@v0.4.3.post2#subdirectory=python; python_version >= '3.11' and (sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine))
 
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp37-cp37m-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.7'
 https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_utils-0.9.1-cp39-cp39-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version == '3.9'
@@ -64,7 +66,8 @@ https://github.com/pguyot/snips-nlu-utils/releases/download/v0.9.1/snips_nlu_uti
 https://github.com/Wulfaz/snips-nlu-utils/releases/download/v0.9.1.post1/snips_nlu_utils-0.9.1.post1-py3-none-linux_armv6l.whl; sys_platform == 'linux' and 'armv6l' in platform_machine and python_version >= '3.11'
 https://github.com/Wulfaz/snips-nlu-utils/releases/download/v0.9.1.post1/snips_nlu_utils-0.9.1.post1-py3-none-linux_armv7l.whl; sys_platform == 'linux' and 'armv7l' in platform_machine and python_version >= '3.11'
 https://github.com/Wulfaz/snips-nlu-utils/releases/download/v0.9.1.post1/snips_nlu_utils-0.9.1.post1-py3-none-linux_aarch64.whl; sys_platform == 'linux' and 'aarch64' in platform_machine and python_version >= '3.11'
-snips-nlu-utils==0.9.1; sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9' and python_version < '3.11')
+snips-nlu-utils==0.9.1; python_version < '3.11' and (sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine) or (python_version != '3.7' and python_version != '3.9'))
+snips-nlu-utils @ git+https://github.com/Wulfaz/snips-nlu-utils@v0.9.1.post1#subdirectory=python; python_version >= '3.11' and (sys_platform != 'linux' or ('armv6l' not in platform_machine and 'armv7l' not in platform_machine and 'aarch64' not in platform_machine))
 
 https://github.com/pguyot/pynfcdev/releases/download/v0.7.4/pynfcdev-0.7.4-py3-none-any.whl
 ndef==0.2
@@ -78,7 +81,7 @@ pathspec==0.9.0
 toml==0.10.2
 appdirs==1.4.4
 regex==2022.3.2
-typed_ast==1.5.2
+typed_ast==1.5.2; python_version < '3.11'
 click==8.1.2
 pytz==2024.1
 asgiref==3.6.0
