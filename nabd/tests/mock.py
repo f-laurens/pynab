@@ -1,10 +1,11 @@
 import asyncio
 import functools
+import socket
 import threading
 import time
 from unittest import TestCase
 
-from nabcommon import hardware, nabservice
+from nabcommon import hardware, nabservice, network
 from nabd.ears import Ears
 from nabd.leds import Led, Leds
 from nabd.nabio import NabIO
@@ -96,9 +97,17 @@ class NabIOMock(NabIO):
 
     def network_interface(self):
         if hardware.is_pi_zero(hardware.device_model()):
-            return "wlan0"
+            default = "wlan0"
         else:
-            return "eth0"
+            default = "eth0"
+        if network.ip_address(default) is not None:
+            return default
+        # CI runners do not always name their interface eth0: use any
+        # interface with an IPv4 address.
+        for _, name in socket.if_nameindex():
+            if name != "lo" and network.ip_address(name) is not None:
+                return name
+        return default
 
     async def gestalt(self):
         return {"model": "Mock_TAGTAG"}
