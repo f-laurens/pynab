@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'bookworm'
+      - 'releng'
   workflow_dispatch:
 
 jobs:
