@@ -160,6 +160,10 @@ jobs:
   create_release:
     name: Release
     runs-on: ubuntu-latest
+    # Forks default to a read-only GITHUB_TOKEN: creating the tag and the
+    # draft release needs write access to the repository contents.
+    permissions:
+      contents: write
     needs:
       - test_suite
       - create_image
