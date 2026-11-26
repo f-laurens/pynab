@@ -45,6 +45,9 @@ ears_repository="Wulfaz/tagtagtag-ears"
 ears_branch="kernel-6.12"
 st25_repository="Wulfaz/st25r391x"
 st25_branch="kernel-6.12"
+# cr14: retries the busy NACK that kernel 6.x reports as -EIO.
+cr14_repository="Wulfaz/cr14"
+cr14_branch="kernel-6.12"
 
 LC_ALL=C
 
@@ -283,7 +286,7 @@ build_and_install_driver
 echo "Installing RFID reader driver for TAGTAG."
 sudo mkdir -p ${inst_dir}/cr14
 sudo chown ${owner}:${group} ${inst_dir}/cr14
-sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/cr14 ${inst_dir}/cr14
+sudo -u ${owner} git clone --depth 1 -b ${cr14_branch} https://github.com/${cr14_repository} ${inst_dir}/cr14
 sudo git config --system --add safe.directory ${inst_dir}/cr14
 cd ${inst_dir}/cr14
 build_and_install_driver

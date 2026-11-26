@@ -135,15 +135,25 @@ if [ $upgrade -eq 1 ]; then
   if [ -d ${inst_dir}/cr14 ]; then
     cd ${inst_dir}/cr14
     sudo chown -R ${uid}:${gid} .
+    # Move rabbits installed from pguyot/cr14 to the fork, which retries the
+    # busy NACK that kernel 6.x reports as -EIO (tags are not read otherwise).
+    cr14_switched=0
+    if ! git remote get-url origin | grep -q "Wulfaz/cr14"; then
+      git remote set-url origin https://github.com/Wulfaz/cr14
+      git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+      git fetch --depth 1 origin kernel-6.12 \
+        && git checkout -B kernel-6.12 origin/kernel-6.12 \
+        && cr14_switched=1
+    fi
     pull=`git pull`
-    if [ "$pull" != "Already up to date." ]; then
+    if [ $cr14_switched -eq 1 -o "$pull" != "Already up to date." ]; then
       build_and_install_driver cr14
       sudo touch /tmp/pynab.upgrade.reboot
     fi
   else
     sudo mkdir -p ${inst_dir}/cr14
     sudo chown ${uid}:${gid} ${inst_dir}/cr14
-    git clone https://github.com/pguyot/cr14 ${inst_dir}/cr14
+    git clone -b kernel-6.12 https://github.com/Wulfaz/cr14 ${inst_dir}/cr14
     cd ${inst_dir}/cr14
     build_and_install_driver cr14
     sudo touch /tmp/pynab.upgrade.reboot
@@ -170,7 +180,7 @@ if [ $upgrade -eq 1 ]; then
   fi
 else
   if [ $ci_chroot -eq 0 -a ! -e "/dev/rfid0" -a ! -e "/dev/nfc0" ]; then
-    echo "If you have a TAGTAG with the original RFID card, you may want to install cr14 RFID driver https://github.com/pguyot/cr14"
+    echo "If you have a TAGTAG with the original RFID card, you may want to install cr14 RFID driver https://github.com/Wulfaz/cr14 (branch kernel-6.12)"
     echo "If you have a 2022 NFC card, you need to install st25r391x RFID driver https://github.com/pguyot/st25r391x"
   fi
 fi
