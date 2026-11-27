@@ -318,19 +318,23 @@ sudo git config --system --add safe.directory ${inst_dir}/pynab
 
 echo "Installing NabBlockly."
 sudo apt-get install --no-install-recommends -y erlang-base erlang-dev erlang-inets erlang-tools erlang-xmerl
-cd ${inst_dir}/pynab
-sudo -u ${owner} git clone --depth 1 -b ${driver_branch} https://github.com/pguyot/nabblockly
-sudo git config --system --add safe.directory ${inst_dir}/pynab/nabblockly
-cd ${inst_dir}/pynab/nabblockly
 # rebar3 must match the OTP release: 3.15.1 for OTP <= 23 (Bullseye),
-# 3.22.1 for OTP 24 to 26 (Bookworm has OTP 25).
+# 3.22.1 for OTP 24 to 26 (Bookworm has OTP 25). NabBlockly's release branch
+# does not build on OTP 24+ (its jiffy hook fails): use master, which has
+# "Handle more versions of Erlang" (pguyot/nabblockly#14).
 otp_release=$(erl -noshell -eval 'io:format("~s", [erlang:system_info(otp_release)]), halt().')
 if [ "${otp_release}" -ge 24 ]
 then
     rebar3_version=3.22.1
+    nabblockly_branch=master
 else
     rebar3_version=3.15.1
+    nabblockly_branch=${driver_branch}
 fi
+cd ${inst_dir}/pynab
+sudo -u ${owner} git clone --depth 1 -b ${nabblockly_branch} https://github.com/pguyot/nabblockly
+sudo git config --system --add safe.directory ${inst_dir}/pynab/nabblockly
+cd ${inst_dir}/pynab/nabblockly
 sudo -u ${owner} wget https://github.com/erlang/rebar3/releases/download/${rebar3_version}/rebar3 && chmod +x rebar3
 sudo apt-get install --no-install-recommends -y g++
 sudo -u ${owner} ./rebar3 release
