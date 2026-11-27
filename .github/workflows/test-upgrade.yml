@@ -1,10 +1,7 @@
 name: 🛠  Test upgrade
 on:
-  push:
-    branches:
-      - 'release'
-  # Upgrades a legacy v0.9.1 (Buster) image: no longer run on releng, whose
-  # images are Bookworm. Run it by hand.
+  # Upgrades a legacy v0.9.1 (Buster) image: no longer run on releng or
+  # release, whose images are Bookworm. Run it by hand.
   workflow_dispatch:
 
 jobs:
